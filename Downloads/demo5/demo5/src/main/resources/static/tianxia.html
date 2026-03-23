@@ -1,0 +1,873 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>天下图书</title>
+  <style>
+    :root {
+      --bg-1: #f5f0e8;
+      --bg-2: #e6efe9;
+      --paper: #fffdf8;
+      --ink: #1e2318;
+      --subtle: #65705a;
+      --line: #d5cdb8;
+      --accent: #2a6247;
+      --accent-2: #1a4a33;
+      --accent-light: #e8f4ee;
+      --gold: #b8860b;
+      --gold-light: #fdf3d0;
+      --warn: #9d5b2c;
+      --danger: #bb3f3f;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(30, 35, 24, 0.09);
+      --shadow-lg: 0 8px 32px rgba(30, 35, 24, 0.13);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, #ede1c8 0 18%, transparent 19%),
+        radial-gradient(ellipse at 90% 5%, #c8dfd0 0 22%, transparent 23%),
+        linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 60%, #3d8b62 100%);
+      color: #fff;
+      padding: 28px 0 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(26, 74, 51, 0.3);
+    }
+
+    .site-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 30px,
+        rgba(255,255,255,0.03) 30px,
+        rgba(255,255,255,0.03) 60px
+      );
+    }
+
+    .site-header-inner {
+      position: relative;
+      width: min(1100px, 94vw);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .site-title {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .site-title-sub {
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      opacity: 0.8;
+      letter-spacing: 0.04em;
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .site-nav a {
+      color: rgba(255,255,255,0.92);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      transition: background 220ms, color 220ms;
+      letter-spacing: 0.02em;
+    }
+
+    .site-nav a:hover {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+    }
+
+    .nav-user {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .nav-logout {
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav-logout:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    /* ── Layout ── */
+    .wrap {
+      width: min(1100px, 94vw);
+      margin: 0 auto 40px;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-sticky {
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--line) transparent;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.1em;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 18px 0 16px;
+    }
+
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .section-title-row .section-title {
+      margin: 0;
+    }
+
+    .refresh-btn {
+      font: inherit;
+      font-size: 0.76rem;
+      padding: 3px 10px;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      background: var(--accent-light);
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 200ms, color 200ms;
+    }
+
+    .refresh-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .section-sub {
+      margin: 0 0 12px;
+      color: var(--subtle);
+      font-size: 0.82rem;
+    }
+
+    .search-row {
+      margin: 10px 0 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+      transition: border-color 180ms, box-shadow 180ms;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(42, 98, 71, 0.12);
+    }
+
+    /* ── Announcement ── */
+    .announcement-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 200ms, box-shadow 200ms;
+    }
+
+    .announcement-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(42, 98, 71, 0.1);
+    }
+
+    .announcement-item.open {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .announcement-item h3 {
+      margin: 0 0 3px;
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.4;
+    }
+
+    .announcement-title-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .announcement-toggle {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+      background: var(--accent-light);
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(42,98,71,0.2);
+    }
+
+    .announcement-meta {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.78rem;
+    }
+
+    .announcement-content {
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 320ms ease, padding 320ms ease;
+      color: var(--ink);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      padding: 0 0 0;
+      border-top: 0px solid var(--line);
+    }
+
+    .announcement-item.open .announcement-content {
+      max-height: 400px;
+      padding: 10px 0 2px;
+      border-top-width: 1px;
+      margin-top: 8px;
+    }
+
+    /* ── Recommended ── */
+    .recommended-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      transition: border-color 200ms, background 200ms;
+    }
+
+    .recommended-item:hover {
+      border-color: var(--gold);
+      background: var(--gold-light);
+    }
+
+    .recommended-cover {
+      width: 34px;
+      height: 46px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      display: block;
+      flex-shrink: 0;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .recommended-cover-empty {
+      width: 34px;
+      height: 46px;
+      border-radius: 3px;
+      border: 1px dashed var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.65rem;
+      background: #f8f4e9;
+      flex-shrink: 0;
+    }
+
+    .recommended-info { flex: 1; min-width: 0; }
+
+    .recommended-item h3 {
+      margin: 0 0 2px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recommended-meta {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.76rem;
+    }
+
+    /* ── Book cards ── */
+    .book-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .book-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: reveal 380ms ease both;
+      transition: transform 220ms, box-shadow 220ms;
+    }
+
+    .book-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .book-card.unavailable {
+      filter: grayscale(0.85);
+      opacity: 0.72;
+    }
+
+    .book-card.unavailable:hover {
+      transform: none;
+      box-shadow: var(--shadow);
+    }
+
+    .book-card-img-wrap {
+      width: 100%;
+      height: 178px;
+      background: linear-gradient(160deg, #f4eedd, #ede5d5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    .book-card-img-wrap::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 6px;
+      background: linear-gradient(to right, rgba(0,0,0,0.08), transparent);
+    }
+
+    .book-card-img {
+      width: 118px;
+      height: 158px;
+      object-fit: cover;
+      display: block;
+      border-radius: 3px;
+      box-shadow: 3px 3px 12px rgba(0,0,0,0.18);
+    }
+
+    .book-card-img-empty {
+      width: 118px;
+      height: 158px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--subtle);
+      font-size: 0.78rem;
+      background: #f8f4ec;
+      border: 1px dashed var(--line);
+      border-radius: 3px;
+    }
+
+    .book-card-img-empty::before {
+      content: '📖';
+      font-size: 1.6rem;
+    }
+
+    .book-card-body {
+      padding: 13px 13px 10px;
+      flex: 1;
+    }
+
+    .book-card-title {
+      margin: 0 0 6px;
+      font-size: 0.96rem;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .book-card-meta {
+      margin: 0 0 2px;
+      color: var(--subtle);
+      font-size: 0.8rem;
+    }
+
+    .book-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 13px;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(to right, #faf7f0, #f4f0e6);
+    }
+
+    .book-card-price {
+      font-weight: 800;
+      color: var(--accent-2);
+      font-size: 1.02rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Chips ── */
+    .book-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      border: 1px solid #cdc6b0;
+      background: #f3efe3;
+      color: #6a6040;
+    }
+
+    .book-chip.recommended {
+      border-color: #d4a820;
+      background: #fff4cc;
+      color: #7a5000;
+    }
+
+    .rating-stars {
+      color: #e0a800;
+      letter-spacing: 1px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .borrow-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .borrow-badge.yes {
+      color: #1f6d3a;
+      background: #e8f7ec;
+      border-color: #b8e2c4;
+    }
+
+    .borrow-badge.no {
+      color: #8a3b3b;
+      background: #fdeeee;
+      border-color: #f4c5c5;
+    }
+
+    /* ── Misc ── */
+    .empty {
+      margin: 14px 0;
+      color: var(--subtle);
+      font-style: italic;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .content { grid-template-columns: 1fr; }
+      .panel-sticky { position: static; max-height: none; }
+      .book-card-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      .book-card-grid { grid-template-columns: 1fr; }
+      .site-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div>
+        <h1 class="site-title">天下图书</h1>
+        <p class="site-title-sub">发现好书 · 了解公告 · 探索世界</p>
+      </div>
+      <nav class="site-nav">
+        <a href="/">返回首页</a>
+        <a href="/login.html">用户登录</a>
+        <a href="/register.html">用户注册</a>
+        <a href="/admin/announcements.html">公告后台</a>
+        <span id="nav-user" class="nav-user" hidden></span>
+        <button id="nav-logout" class="nav-logout" type="button" hidden>登出</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="content">
+      <aside class="panel panel-sticky">
+        <h2 class="section-title">系统公告</h2>
+        <p class="section-sub">最新消息，点击展开详情。</p>
+        <div id="announcement-list"></div>
+
+        <hr class="section-divider" />
+
+        <div class="section-title-row">
+          <h2 class="section-title">推荐图书</h2>
+          <button class="refresh-btn" id="refresh-recommended" title="随机换一换">换一换</button>
+        </div>
+        <p class="section-sub">随机推荐 3 本好书。</p>
+        <div id="recommended-list"></div>
+      </aside>
+
+      <section class="panel">
+        <h2 class="section-title">图书列表</h2>
+        <p class="section-sub">全部馆藏图书展示。</p>
+        <div class="search-row">
+          <input id="book-search" class="search-input" type="search" placeholder="搜索书名、作者、分类" />
+        </div>
+        <div id="book-list" class="book-card-grid"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'demo5_current_user';
+    const bookListEl = document.getElementById('book-list');
+    const recommendedListEl = document.getElementById('recommended-list');
+    const announcementListEl = document.getElementById('announcement-list');
+    const bookSearchEl = document.getElementById('book-search');
+    const navUserEl = document.getElementById('nav-user');
+    const navLogoutEl = document.getElementById('nav-logout');
+
+    let books = [];
+    let bookKeyword = '';
+
+    function syncAuthUi() {
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      if (!username) {
+        navUserEl.hidden = true;
+        navLogoutEl.hidden = true;
+        return;
+      }
+      navUserEl.hidden = false;
+      navLogoutEl.hidden = false;
+      navUserEl.textContent = `当前用户：${username}`;
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString();
+    }
+
+    function formatInt(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        return '0';
+      }
+      return String(Math.max(0, Math.round(numeric)));
+    }
+
+    function starText(value) {
+      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
+      return `<span class="rating-stars" aria-label="${score}星">${'★'.repeat(score)}${'☆'.repeat(5 - score)}</span>`;
+    }
+
+    function isBorrowable(stock) {
+      return Number(stock) > 0;
+    }
+
+    function borrowStatusHtml(stock) {
+      if (isBorrowable(stock)) {
+        return '<span class="borrow-badge yes">可出借</span>';
+      }
+      return '<span class="borrow-badge no">不可出借</span>';
+    }
+
+    function coverCell(imageUrl, title) {
+      if (!imageUrl) {
+        return '<div class="cover-empty">无图</div>';
+      }
+      return `<img class="book-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    }
+
+    function recommendedCover(imageUrl, title) {
+      if (!imageUrl) {
+        return '<div class="recommended-cover-empty">无图</div>';
+      }
+      return `<img class="recommended-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    }
+
+    function stateLabel(state) {
+      return state === 'RECOMMENDED' ? '推荐' : '普通';
+    }
+
+    function stateClass(state) {
+      return state === 'RECOMMENDED' ? 'recommended' : '';
+    }
+
+    function getFilteredBooks() {
+      const keyword = bookKeyword.trim().toLowerCase();
+      if (!keyword) {
+        return books;
+      }
+      return books.filter((book) => {
+        const title = String(book.title || '').toLowerCase();
+        const author = String(book.author || '').toLowerCase();
+        const category = String(book.category || '').toLowerCase();
+        return title.includes(keyword) || author.includes(keyword) || category.includes(keyword);
+      });
+    }
+
+    function renderRecommendedBooks() {
+      const pool = books.filter((book) => book.status === 'RECOMMENDED');
+      recommendedListEl.innerHTML = '';
+      if (!pool.length) {
+        recommendedListEl.innerHTML = '<p class="empty">暂无推荐图书</p>';
+        return;
+      }
+
+      // shuffle and pick 3
+      const shuffled = pool.slice().sort(() => Math.random() - 0.5);
+      const display = shuffled.slice(0, 3);
+
+      display.forEach((book) => {
+        const box = document.createElement('article');
+        box.className = 'recommended-item';
+        box.innerHTML = `
+          ${recommendedCover(book.image, book.title)}
+          <div class="recommended-info">
+            <h3>${escapeHtml(book.title)}</h3>
+            <p class="recommended-meta">${escapeHtml(book.author)} · 库存 ${formatInt(book.stock)} · 推荐指数 ${starText(book.recommendationIndex)}</p>
+            <p class="recommended-meta">${borrowStatusHtml(book.stock)}</p>
+          </div>
+        `;
+        recommendedListEl.appendChild(box);
+      });
+    }
+
+    function renderBooks() {
+      const list = getFilteredBooks();
+      bookListEl.innerHTML = '';
+      if (!books.length) {
+        bookListEl.innerHTML = '<p class="empty">暂无图书</p>';
+        return;
+      }
+
+      if (!list.length) {
+        bookListEl.innerHTML = '<p class="empty">未找到匹配的图书</p>';
+        return;
+      }
+
+      list.forEach((book) => {
+        const card = document.createElement('article');
+        card.className = `book-card${isBorrowable(book.stock) ? '' : ' unavailable'}`;
+        const innerImg = book.image
+          ? `<img class="book-card-img" src="${escapeHtml(book.image)}" alt="${escapeHtml(book.title)}" loading="lazy" />`
+          : `<div class="book-card-img-empty">暂无封面</div>`;
+        const imgHtml = `<div class="book-card-img-wrap">${innerImg}</div>`;
+        card.innerHTML = `
+          ${imgHtml}
+          <div class="book-card-body">
+            <h3 class="book-card-title">${escapeHtml(book.title)}</h3>
+            <p class="book-card-meta">作者：${escapeHtml(book.author)}</p>
+            <p class="book-card-meta">分类：${escapeHtml(book.category)}</p>
+            <p class="book-card-meta">推荐指数：${starText(book.recommendationIndex)}</p>
+          </div>
+          <div class="book-card-footer">
+            <span class="book-card-price">库存：${formatInt(book.stock)}</span>
+            ${borrowStatusHtml(book.stock)}
+          </div>
+        `;
+        bookListEl.appendChild(card);
+      });
+    }
+
+    async function loadBooks() {
+      try {
+        const res = await fetch('/api/books');
+        if (!res.ok) {
+          throw new Error('图书加载失败');
+        }
+        const data = await res.json();
+        books = Array.isArray(data) ? data : [];
+        renderBooks();
+        renderRecommendedBooks();
+      } catch (error) {
+        books = [];
+        renderBooks();
+        renderRecommendedBooks();
+      }
+    }
+
+    function renderAnnouncements(items) {
+      announcementListEl.innerHTML = '';
+      if (!items.length) {
+        announcementListEl.innerHTML = '<p class="empty">暂无公告</p>';
+        return;
+      }
+
+      items.forEach((item) => {
+        const box = document.createElement('article');
+        box.className = 'announcement-item';
+        box.innerHTML = `
+          <h3>
+            <span class="announcement-title-text">${escapeHtml(item.title)}</span>
+            <span class="announcement-toggle">展开</span>
+          </h3>
+          <p class="announcement-meta">${formatTime(item.publishedAt)}</p>
+          <p class="announcement-content">${escapeHtml(item.content)}</p>
+        `;
+        box.addEventListener('click', () => {
+          const isOpen = box.classList.toggle('open');
+          box.querySelector('.announcement-toggle').textContent = isOpen ? '收起' : '展开';
+        });
+        announcementListEl.appendChild(box);
+      });
+    }
+
+    async function loadAnnouncements() {
+      try {
+        const res = await fetch('/api/announcements');
+        const data = await res.json();
+        renderAnnouncements(Array.isArray(data) ? data : []);
+      } catch (error) {
+        announcementListEl.innerHTML = '<p class="empty">公告加载失败，请稍后刷新重试。</p>';
+      }
+    }
+
+    loadBooks();
+    loadAnnouncements();
+
+    bookSearchEl.addEventListener('input', () => {
+      bookKeyword = bookSearchEl.value || '';
+      renderBooks();
+    });
+
+    document.getElementById('refresh-recommended').addEventListener('click', () => {
+      renderRecommendedBooks();
+    });
+
+    navLogoutEl.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      syncAuthUi();
+      window.location.href = '/login.html';
+    });
+
+    syncAuthUi();
+  </script>
+</body>
+</html>

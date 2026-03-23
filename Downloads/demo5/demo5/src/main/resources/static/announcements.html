@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公告列表</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #fff;
+      --text: #1f2a44;
+      --muted: #6f7b94;
+      --line: #dbe2f0;
+      --link: #1a73e8;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(920px, 92vw);
+      margin: 34px auto;
+    }
+
+    .top-links {
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .top-links a {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .announcement-item {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .announcement-item h3 {
+      margin: 0 0 6px;
+    }
+
+    .announcement-meta {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status-tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #ecf9f0;
+      border: 1px solid #cdebd8;
+      color: #1f8a4c;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .empty {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>系统公告</h1>
+    <div class="top-links">
+      <a href="/">返回首页</a>
+      <a href="/admin/announcements.html">进入后台管理</a>
+    </div>
+    <div id="announcement-list"></div>
+  </div>
+
+  <script>
+    const listEl = document.getElementById('announcement-list');
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString();
+    }
+
+    function renderList(items) {
+      listEl.innerHTML = '';
+      if (!items.length) {
+        listEl.innerHTML = '<p class="empty">暂无公告</p>';
+        return;
+      }
+
+      items.forEach((item) => {
+        const box = document.createElement('article');
+        box.className = 'announcement-item';
+        box.innerHTML = `
+          <h3>${escapeHtml(item.title)} <span class="status-tag">已发布</span></h3>
+          <p class="announcement-meta">发布时间：${formatTime(item.publishedAt)}</p>
+          <p>${escapeHtml(item.content)}</p>
+        `;
+        listEl.appendChild(box);
+      });
+    }
+
+    async function loadAnnouncements() {
+      try {
+        const res = await fetch('/api/announcements');
+        const data = await res.json();
+        renderList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        listEl.innerHTML = '<p class="empty">加载失败，请稍后刷新重试。</p>';
+      }
+    }
+
+    loadAnnouncements();
+  </script>
+</body>
+</html>

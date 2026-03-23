@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WBSレポート</title>
+  <style>
+    :root {
+      --bg: #f5f2ea;
+      --panel: #fffdf8;
+      --line: #ddd4c5;
+      --text: #283024;
+      --muted: #66705f;
+      --accent: #2f6d4f;
+      --accent-soft: #e8f2ec;
+      --done: #2f7d4f;
+      --plan: #9c6a1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: linear-gradient(135deg, #efe6d2, #eef4ec);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Noto Serif SC", sans-serif;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(40, 48, 36, 0.08);
+    }
+
+    .header {
+      padding: 20px 24px;
+      margin-bottom: 18px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .summary-card {
+      background: #faf7ef;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    th {
+      background: #f3eee2;
+      color: #4c5846;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.done {
+      background: #e8f7ec;
+      color: var(--done);
+    }
+
+    .tag.plan {
+      background: #fff2db;
+      color: var(--plan);
+    }
+
+    .tag.risk {
+      background: #fdeeed;
+      color: #a14a4a;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li + li {
+      margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        border-bottom: 1px solid var(--line);
+        padding: 8px 0;
+      }
+
+      td {
+        border: 0;
+        padding: 6px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="header">
+      <h1>図書システム WBSレポート</h1>
+      <p class="meta">レポート日：2026-03-23　|　期間：2026-03-23 ～ 2026-03-27　|　案件：Demo5 図書管理および天下図書ポータル</p>
+    </section>
+
+    <section class="panel">
+      <h2>全体概要</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <strong>本日の完了事項</strong>
+          お知らせ表示、図書ポータル、推薦ロジック、検索、ログイン・登録、貸出可否表示などの主要フローを一通り接続済み。
+        </div>
+        <div class="summary-card">
+          <strong>現在の注力点</strong>
+          ログインの実用性、画面連携の完全性、貸出業務ルールの具体化、フロント体験と導線の統合。
+        </div>
+        <div class="summary-card">
+          <strong>今後4日間の目標</strong>
+          権限制御の追加、貸出フローの補完、ユーザー体験の改善、結合テストと成果物整理を完了する。
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>WBS詳細レポート</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>フェーズ</th>
+            <th>WBSタスク</th>
+            <th>成果物</th>
+            <th>状態</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-03-23</td>
+            <td>ポータル・アカウント基盤</td>
+            <td>
+              <ul>
+                <li>天下図書ポータル画面のレイアウトとスタイルを整理し完成</li>
+                <li>図書カード、推薦欄、お知らせ欄、検索欄の連携を実装</li>
+                <li>ユーザー登録画面、ログイン画面、バックエンドAPIを実装</li>
+                <li>ユーザー名表示、ログアウト、推薦星評価、貸出可否表示を接続</li>
+                <li>貸出不可の図書カードをグレー表示に変更</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>天下図書ページの利用可能版</li>
+                <li>登録画面 / ログイン画面</li>
+                <li>ユーザー登録・ログインAPI</li>
+                <li>在庫、推薦指数、貸出状態表示の完成</li>
+              </ul>
+            </td>
+            <td><span class="tag done">完了</span></td>
+            <td>本日は主要機能の接続を中心に進め、現時点で図書表示、推薦、お知らせ、ユーザー登録・ログインの基本機能が利用可能。</td>
+          </tr>
+          <tr>
+            <td>2026-03-24</td>
+            <td>ログイン制御と画面権限</td>
+            <td>
+              <ul>
+                <li>未ログインユーザーが天下図書ページへ直接アクセスできないよう制御</li>
+                <li>ログイン後は「ログイン/登録」導線を非表示にし、ユーザー名とログアウトのみ表示</li>
+                <li>ログイン成功後の画面遷移とステータス表示を改善</li>
+                <li>ローカル保存されたログイン状態の期限切れ・失効処理を補完</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>フロントエンドのログインガード</li>
+                <li>ナビゲーション表示切替ロジック</li>
+                <li>ログイン状態検証方式</li>
+              </ul>
+            </td>
+            <td><span class="tag plan">予定</span></td>
+            <td>ポータルを「誰でも閲覧可能」から「ログイン状態に応じて閲覧可能」へ引き上げることが目的。</td>
+          </tr>
+          <tr>
+            <td>2026-03-25</td>
+            <td>貸出業務の詳細化</td>
+            <td>
+              <ul>
+                <li>貸出ボタンと貸出アクションを追加</li>
+                <li>貸出後に在庫を自動減算</li>
+                <li>在庫が0になった際に自動で貸出不可へ変更</li>
+                <li>貸出成功・失敗時のメッセージ表示を追加</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>貸出操作UI試作</li>
+                <li>在庫自動更新ロジック</li>
+                <li>貸出フィードバック表示</li>
+              </ul>
+            </td>
+            <td><span class="tag plan">予定</span></td>
+            <td>この段階では現在の「貸出可能表示」を実際に「貸出できる機能」へ拡張する。</td>
+          </tr>
+          <tr>
+            <td>2026-03-26</td>
+            <td>ユーザー中心機能とデータ連携</td>
+            <td>
+              <ul>
+                <li>ユーザー貸出履歴データ構造を作成</li>
+                <li>「マイ貸出」画面またはエリアを追加</li>
+                <li>現在貸出中の図書を確認できるようにする</li>
+                <li>返却APIおよび返却導線を事前に用意</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>貸出履歴テーブル/エンティティ</li>
+                <li>マイ貸出画面</li>
+                <li>ユーザーと図書の関連付けロジック</li>
+              </ul>
+            </td>
+            <td><span class="tag plan">予定</span></td>
+            <td>この段階で「ユーザーログイン」と「図書貸出」を一体化し、業務フローを完成させる。</td>
+          </tr>
+          <tr>
+            <td>2026-03-27</td>
+            <td>結合テストと納品整理</td>
+            <td>
+              <ul>
+                <li>登録、ログイン、推薦、お知らせ、貸出状態の結合テストを実施</li>
+                <li>画面文言、スタイル細部、例外メッセージを整理</li>
+                <li>デモデータと操作説明を補完</li>
+                <li>段階成果レポートと受入観点を整理</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>テスト記録</li>
+                <li>改善済みデモ版</li>
+                <li>納品説明書と受入チェックリスト</li>
+              </ul>
+            </td>
+            <td><span class="tag plan">予定</span></td>
+            <td>デモ可能で、報告しやすく、今後も拡張可能な安定版をまとめることが目標。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>リスクと備考</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>区分</th>
+            <th>内容</th>
+            <th>対応案</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag risk">環境</span></td>
+            <td>ローカルの Maven / JDK バージョン差異によりコンパイル環境が不安定になる可能性がある。</td>
+            <td>JDK 17 環境を統一し、DB接続設定を固定した上で回帰テストを実施する。</td>
+          </tr>
+          <tr>
+            <td><span class="tag risk">セキュリティ</span></td>
+            <td>現在のログイン状態はフロントエンドのローカル保存のみで、サーバー側セッション制御は未実装。</td>
+            <td>今後、サーバー側セッションまたはトークン方式を追加し、フロント保存のみに依存しない構成へ改善する。</td>
+          </tr>
+          <tr>
+            <td><span class="tag risk">業務</span></td>
+            <td>現時点では「貸出可否表示」のみで、貸出・返却の業務処理は未完成。</td>
+            <td>貸出履歴、在庫更新、返却フロー、異常処理を優先して補完する。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
