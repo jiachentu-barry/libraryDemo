@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的借阅</title>
+  <style>
+    :root {
+      --bg-1: #f5f0e8;
+      --bg-2: #e6efe9;
+      --paper: #fffdf8;
+      --ink: #1e2318;
+      --subtle: #65705a;
+      --line: #d5cdb8;
+      --accent: #2a6247;
+      --accent-2: #1a4a33;
+      --accent-light: #e8f4ee;
+      --gold: #b8860b;
+      --warn: #9d5b2c;
+      --danger: #bb3f3f;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(30, 35, 24, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, #ede1c8 0 18%, transparent 19%),
+        radial-gradient(ellipse at 90% 5%, #c8dfd0 0 22%, transparent 23%),
+        linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+    }
+
+    .site-header {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 60%, #3d8b62 100%);
+      color: #fff;
+      padding: 28px 0 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(26, 74, 51, 0.3);
+    }
+
+    .site-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent, transparent 30px,
+        rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 60px
+      );
+    }
+
+    .site-header-inner {
+      position: relative;
+      width: min(1000px, 94vw);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .site-title { margin: 0; font-size: 2rem; font-weight: 900; letter-spacing: 0.12em; }
+    .site-title-sub { margin: 4px 0 0; font-size: 0.88rem; opacity: 0.8; }
+
+    .site-nav { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .site-nav a {
+      color: rgba(255,255,255,0.92);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      transition: background 220ms, color 220ms;
+    }
+    .site-nav a:hover { background: rgba(255,255,255,0.18); }
+
+    .nav-user {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .nav-logout {
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-logout:hover { background: rgba(255,255,255,0.18); }
+
+    .wrap { width: min(1000px, 94vw); margin: 0 auto 40px; }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.1em;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Table */
+    .borrow-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .borrow-table th {
+      text-align: left;
+      padding: 8px 12px;
+      color: var(--subtle);
+      font-weight: 700;
+      font-size: 0.82rem;
+      border-bottom: 2px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .borrow-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .borrow-table tr:last-child td { border-bottom: none; }
+
+    .borrow-table tr:hover td { background: var(--accent-light); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .status-badge.BORROWED { background: #e8f7ec; color: #1f6d3a; border-color: #b8e2c4; }
+    .status-badge.RETURNED { background: #f0f0f0; color: #555; border-color: #ccc; }
+    .status-badge.OVERDUE  { background: #fdeeee; color: #bb3f3f; border-color: #f4c5c5; }
+
+    .return-btn {
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--warn);
+      background: #fff3eb;
+      color: var(--warn);
+      cursor: pointer;
+      transition: background 200ms, color 200ms;
+      white-space: nowrap;
+    }
+    .return-btn:hover { background: var(--warn); color: #fff; }
+    .return-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .empty {
+      padding: 20px 0;
+      color: var(--subtle);
+      font-style: italic;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel { animation: reveal 350ms ease both; }
+
+    @media (max-width: 700px) {
+      .borrow-table thead { display: none; }
+      .borrow-table td {
+        display: block;
+        padding: 4px 8px;
+        border: none;
+      }
+      .borrow-table tr {
+        display: block;
+        border-bottom: 1px solid var(--line);
+        padding: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div>
+        <h1 class="site-title">我的借阅</h1>
+        <p class="site-title-sub">查看当前在借及借阅历史</p>
+      </div>
+      <nav class="site-nav">
+        <a href="/tianxia.html">图书列表</a>
+        <a id="nav-login" href="/login.html">用户登录</a>
+        <a id="nav-register" href="/register.html">用户注册</a>
+        <span id="nav-user" class="nav-user" hidden></span>
+        <button id="nav-logout" class="nav-logout" type="button" hidden>登出</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- Active borrows -->
+    <div class="panel">
+      <h2 class="section-title">当前在借</h2>
+      <div id="active-borrows"></div>
+    </div>
+
+    <!-- History -->
+    <div class="panel">
+      <h2 class="section-title">借阅历史</h2>
+      <div id="history-borrows"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'demo5_current_user';
+    const navUserEl = document.getElementById('nav-user');
+    const navLogoutEl = document.getElementById('nav-logout');
+    const activeEl = document.getElementById('active-borrows');
+    const historyEl = document.getElementById('history-borrows');
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? value : d.toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function syncAuthUi() {
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const loggedIn = !!username;
+      document.getElementById('nav-login').hidden = loggedIn;
+      document.getElementById('nav-register').hidden = loggedIn;
+      if (!loggedIn) { navUserEl.hidden = true; navLogoutEl.hidden = true; return; }
+      navUserEl.hidden = false;
+      navLogoutEl.hidden = false;
+      navUserEl.textContent = `当前用户：${username}`;
+    }
+
+    function statusBadge(status) {
+      const labels = { BORROWED: '借阅中', RETURNED: '已归还', OVERDUE: '已逾期' };
+      return `<span class="status-badge ${escapeHtml(status)}">${labels[status] || escapeHtml(status)}</span>`;
+    }
+
+    function buildTable(records, showReturnBtn) {
+      if (!records.length) return '<p class="empty">暂无记录</p>';
+
+      const rows = records.map((r) => {
+        const returnBtnHtml = (showReturnBtn && r.status !== 'RETURNED')
+          ? `<button class="return-btn" data-borrow-id="${r.id}" data-book-id="${r.bookId}">归还</button>`
+          : '';
+        return `
+          <tr>
+            <td>${escapeHtml(r.bookTitle)}</td>
+            <td>${escapeHtml(r.bookAuthor)}</td>
+            <td>${formatDateTime(r.borrowedAt)}</td>
+            <td>${formatDateTime(r.dueDate)}</td>
+            <td>${r.returnedAt ? formatDateTime(r.returnedAt) : '-'}</td>
+            <td>${statusBadge(r.status)}</td>
+            <td>${returnBtnHtml}</td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <table class="borrow-table">
+          <thead>
+            <tr>
+              <th>书名</th><th>作者</th><th>借出时间</th><th>应还日期</th><th>归还时间</th><th>状态</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    async function loadBorrows() {
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      if (!username) {
+        activeEl.innerHTML = '<p class="empty">请先<a href="/login.html">登录</a>后查看借阅记录</p>';
+        historyEl.innerHTML = '';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/users/${encodeURIComponent(username)}/borrows`);
+        if (!res.ok) throw new Error('加载失败');
+        const data = await res.json();
+        const all = Array.isArray(data) ? data : [];
+
+        const active = all.filter((r) => r.status === 'BORROWED' || r.status === 'OVERDUE');
+        const history = all.filter((r) => r.status === 'RETURNED');
+
+        activeEl.innerHTML = buildTable(active, true);
+        historyEl.innerHTML = buildTable(history, false);
+      } catch (e) {
+        activeEl.innerHTML = '<p class="empty">加载失败，请稍后刷新重试</p>';
+        historyEl.innerHTML = '';
+      }
+    }
+
+    // Return book handler (event delegation)
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.return-btn');
+      if (!btn) return;
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const borrowId = btn.dataset.borrowId;
+      if (!username || !borrowId) return;
+
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/borrow/${borrowId}/return`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.message || '归还失败'); btn.disabled = false; return; }
+        await loadBorrows();
+      } catch (err) {
+        alert('请求失败，请稍后重试');
+        btn.disabled = false;
+      }
+    });
+
+    navLogoutEl.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      syncAuthUi();
+      window.location.href = '/login.html';
+    });
+
+    syncAuthUi();
+    loadBorrows();
+  </script>
+</body>
+</html>

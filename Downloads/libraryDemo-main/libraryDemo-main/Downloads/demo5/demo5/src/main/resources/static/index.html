@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>图书管理中心</title>
+  <style>
+    :root {
+      --bg-1: #f6f2e7;
+      --bg-2: #e8f1e5;
+      --paper: #fffdf8;
+      --ink: #2a2f24;
+      --subtle: #6d7461;
+      --line: #d8d2c0;
+      --accent: #2f6d4f;
+      --accent-2: #1f5039;
+      --warn: #9d5b2c;
+      --danger: #bb3f3f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 12% 8%, #f1e2c8 0 20%, transparent 21%),
+        radial-gradient(circle at 88% 14%, #cfe4d5 0 24%, transparent 25%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1100px, 94vw);
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--paper) 90%, white 10%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(42, 47, 36, 0.08);
+    }
+
+    h1,
+    h2 {
+      margin: 0 0 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--subtle);
+    }
+
+    .links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .auth-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .auth-user {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef5ef;
+      border: 1px solid #cfe1d1;
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    .auth-logout {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: #7d8674;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .auth-logout:hover {
+      background: #656d5c;
+    }
+
+    .book-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .book-form .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-2);
+    }
+
+    button.secondary {
+      background: #7d8674;
+    }
+
+    button.secondary:hover {
+      background: #656d5c;
+    }
+
+    button.warn {
+      background: var(--warn);
+    }
+
+    button.warn:hover {
+      background: #834b22;
+    }
+
+    .status {
+      margin: 0;
+      font-weight: 700;
+      color: var(--subtle);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.96rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f4efdf;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #566148;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .book-cover {
+      width: 52px;
+      height: 68px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      display: block;
+      background: #f2efe7;
+    }
+
+    .cover-empty {
+      width: 52px;
+      height: 68px;
+      border-radius: 6px;
+      border: 1px dashed var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.8rem;
+      background: #f8f4e9;
+    }
+
+    .upload-box {
+      display: grid;
+      gap: 8px;
+    }
+
+    .upload-preview {
+      width: 96px;
+      height: 128px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      background: #f4efe3;
+      display: none;
+    }
+
+    .upload-tip {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.84rem;
+    }
+
+    .announcement-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      animation: reveal 360ms ease both;
+    }
+
+    .announcement-item h3 {
+      margin: 0 0 6px;
+    }
+
+    .announcement-meta {
+      margin: 0 0 8px;
+      color: var(--subtle);
+      font-size: 0.9rem;
+    }
+
+    .book-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid #d8d2c0;
+      background: #f7f3e8;
+      color: #6f6547;
+    }
+
+    .book-chip.recommended {
+      border-color: #f0c462;
+      background: #fff3d6;
+      color: #8f5b13;
+    }
+
+    .rating-stars {
+      color: #e0a800;
+      letter-spacing: 1px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .borrow-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .borrow-badge.yes {
+      color: #1f6d3a;
+      background: #e8f7ec;
+      border-color: #b8e2c4;
+    }
+
+    .borrow-badge.no {
+      color: #8a3b3b;
+      background: #fdeeee;
+      border-color: #f4c5c5;
+    }
+
+    .recommended-item {
+      display: grid;
+      grid-template-columns: 1fr 72px;
+      gap: 10px;
+      background: #fff;
+      border: 1px dashed #d6cdaa;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .recommended-item h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .recommended-meta {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.9rem;
+    }
+
+    .recommended-cover {
+      width: 72px;
+      height: 96px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      display: block;
+      background: #f3eee2;
+    }
+
+    .recommended-cover-empty {
+      width: 72px;
+      height: 96px;
+      border-radius: 8px;
+      border: 1px dashed var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.82rem;
+      background: #f8f4e9;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--subtle);
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="panel">
+      <h1>图书管理中心</h1>
+      <p class="subtitle">录入、编辑、删除图书信息。数据保存到数据库。</p>
+      <div class="links">
+        <a id="link-login" href="/login.html">用户登录</a>
+        <a href="/tianxia.html">天下图书</a>
+        <a id="link-register" href="/register.html">用户注册</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">进入公告后台</a>
+        <span id="auth-inline" class="auth-inline" hidden>
+          <span id="auth-user" class="auth-user"></span>
+          <button id="logout-btn" class="auth-logout" type="button">登出</button>
+        </span>
+      </div>
+
+      <form id="book-form" class="book-form">
+        <div>
+          <label for="book-title">书名</label>
+          <input id="book-title" maxlength="120" required />
+        </div>
+        <div>
+          <label for="book-author">作者</label>
+          <input id="book-author" maxlength="80" required />
+        </div>
+        <div>
+          <label for="book-category">分类</label>
+          <input id="book-category" maxlength="50" placeholder="如：计算机 / 文学 / 历史" required />
+        </div>
+        <div>
+          <label for="book-stock">库存数</label>
+          <input id="book-stock" type="number" min="0" max="999999" step="1" required />
+        </div>
+        <div>
+          <label for="book-recommendation-index">推荐指数</label>
+          <input id="book-recommendation-index" type="number" min="1" max="5" step="1" required />
+        </div>
+        <div>
+          <label for="book-image-file">图片上传</label>
+          <div class="upload-box">
+            <input id="book-image-file" type="file" accept="image/*" />
+            <img id="book-image-preview" class="upload-preview" alt="封面预览" />
+            <p class="upload-tip">支持本地上传，保存前会自动压缩图片，减少数据库存储长度。</p>
+          </div>
+        </div>
+        <div>
+          <label for="book-state">状态</label>
+          <select id="book-state">
+            <option value="NORMAL">普通</option>
+            <option value="RECOMMENDED">推荐</option>
+          </select>
+        </div>
+      </form>
+
+      <div class="actions">
+        <button id="save-book" type="button">新增图书</button>
+        <button id="cancel-edit" class="secondary" type="button" hidden>取消编辑</button>
+        <p id="book-status" class="status"></p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>书名</th>
+            <th>图片</th>
+            <th>作者</th>
+            <th>分类</th>
+            <th>库存数</th>
+            <th>可出借</th>
+            <th>推荐指数</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="book-list"></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>表单操作演示</h2>
+      <p class="subtitle">这是一个简单的表单示例。详细功能请访问<a href="/tianxia.html" style="color: var(--accent);">天下图书</a>页面。</p>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'demo5_current_user';
+    const bookForm = document.getElementById('book-form');
+    const titleInput = document.getElementById('book-title');
+    const authorInput = document.getElementById('book-author');
+    const categoryInput = document.getElementById('book-category');
+    const stockInput = document.getElementById('book-stock');
+    const recommendationIndexInput = document.getElementById('book-recommendation-index');
+    const imageFileInput = document.getElementById('book-image-file');
+    const imagePreview = document.getElementById('book-image-preview');
+    const stateInput = document.getElementById('book-state');
+    const saveBookBtn = document.getElementById('save-book');
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    const bookStatusEl = document.getElementById('book-status');
+    const bookListEl = document.getElementById('book-list');
+    const authInlineEl = document.getElementById('auth-inline');
+    const authUserEl = document.getElementById('auth-user');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    let books = [];
+    let editingBookId = null;
+    let currentImage = '';
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString();
+    }
+
+    function setBookStatus(message, isError) {
+      bookStatusEl.textContent = message || '';
+      bookStatusEl.className = isError ? 'status error' : 'status';
+    }
+
+    function syncAuthUi() {
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const loggedIn = !!username;
+      document.getElementById('link-login').hidden = loggedIn;
+      document.getElementById('link-register').hidden = loggedIn;
+      if (!username) {
+        authInlineEl.hidden = true;
+        authUserEl.textContent = '';
+        return;
+      }
+      authInlineEl.hidden = false;
+      authUserEl.textContent = `当前用户：${username}`;
+    }
+
+    function resetBookForm() {
+      editingBookId = null;
+      saveBookBtn.textContent = '新增图书';
+      cancelEditBtn.hidden = true;
+      bookForm.reset();
+      currentImage = '';
+      imageFileInput.value = '';
+      imagePreview.style.display = 'none';
+      imagePreview.removeAttribute('src');
+      stateInput.value = 'NORMAL';
+    }
+
+    function updateImagePreview(image) {
+      currentImage = image || '';
+      if (!currentImage) {
+        imagePreview.style.display = 'none';
+        imagePreview.removeAttribute('src');
+        return;
+      }
+      imagePreview.src = currentImage;
+      imagePreview.style.display = 'block';
+    }
+
+    function loadImage(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('图片解析失败'));
+        image.src = dataUrl;
+      });
+    }
+
+    function readAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(new Error('图片读取失败'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function compressImage(file) {
+      const rawDataUrl = await readAsDataUrl(file);
+      const image = await loadImage(rawDataUrl);
+
+      const maxSide = 420;
+      const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * ratio));
+      const height = Math.max(1, Math.round(image.height * ratio));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return rawDataUrl;
+      }
+
+      ctx.drawImage(image, 0, 0, width, height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.72);
+      return compressed || rawDataUrl;
+    }
+
+    function formatInt(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        return '0';
+      }
+      return String(Math.max(0, Math.round(numeric)));
+    }
+
+    function starText(value) {
+      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
+      return `<span class="rating-stars" aria-label="${score}星">${'★'.repeat(score)}${'☆'.repeat(5 - score)}</span>`;
+    }
+
+    function isBorrowable(stock) {
+      return Number(stock) > 0;
+    }
+
+    function borrowStatusHtml(stock) {
+      if (isBorrowable(stock)) {
+        return '<span class="borrow-badge yes">可出借</span>';
+      }
+      return '<span class="borrow-badge no">不可出借</span>';
+    }
+
+    function coverCell(imageUrl, title) {
+      if (!imageUrl) {
+        return '<div class="cover-empty">无图</div>';
+      }
+      return `<img class="book-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    }
+
+    function recommendedCover(imageUrl, title) {
+      if (!imageUrl) {
+        return '<div class="recommended-cover-empty">无图</div>';
+      }
+      return `<img class="recommended-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    }
+
+    function stateLabel(state) {
+      return state === 'RECOMMENDED' ? '推荐' : '普通';
+    }
+
+    function stateClass(state) {
+      return state === 'RECOMMENDED' ? 'recommended' : '';
+    }
+
+    function renderBooks() {
+      bookListEl.innerHTML = '';
+      if (!books.length) {
+        bookListEl.innerHTML = '<tr><td colspan="8" class="empty">暂无图书，请先新增。</td></tr>';
+        return;
+      }
+
+      books.forEach((book) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${escapeHtml(book.title)}</td>
+          <td>${coverCell(book.image, book.title)}</td>
+          <td>${escapeHtml(book.author)}</td>
+          <td>${escapeHtml(book.category)}</td>
+          <td>${formatInt(book.stock)}</td>
+          <td>${borrowStatusHtml(book.stock)}</td>
+          <td>${starText(book.recommendationIndex)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="secondary" type="button" data-action="edit" data-id="${book.id}">编辑</button>
+              <button class="warn" type="button" data-action="delete" data-id="${book.id}">删除</button>
+            </div>
+          </td>
+        `;
+        bookListEl.appendChild(row);
+      });
+    }
+
+    async function loadBooks() {
+      try {
+        const res = await fetch('/api/books');
+        if (!res.ok) {
+          throw new Error('图书加载失败');
+        }
+        const data = await res.json();
+        books = Array.isArray(data) ? data : [];
+        renderBooks();
+      } catch (error) {
+        books = [];
+        renderBooks();
+        setBookStatus(error.message || '图书加载失败', true);
+      }
+    }
+
+    async function upsertBook() {
+      const payload = {
+        title: titleInput.value.trim(),
+        author: authorInput.value.trim(),
+        category: categoryInput.value.trim(),
+        stock: Number(stockInput.value),
+        recommendationIndex: Number(recommendationIndexInput.value),
+        image: currentImage,
+        status: stateInput.value === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL'
+      };
+
+      if (!payload.title || !payload.author || !payload.category) {
+        setBookStatus('请完整填写图书信息', true);
+        return;
+      }
+      if (!Number.isFinite(payload.stock) || payload.stock < 0) {
+        setBookStatus('库存数必须是大于等于 0 的整数', true);
+        return;
+      }
+      if (!Number.isFinite(payload.recommendationIndex) || payload.recommendationIndex < 1 || payload.recommendationIndex > 5) {
+        setBookStatus('推荐指数必须是 1-5 的整数', true);
+        return;
+      }
+      payload.stock = Math.round(payload.stock);
+      payload.recommendationIndex = Math.round(payload.recommendationIndex);
+
+      try {
+        const url = editingBookId ? `/api/books/${editingBookId}` : '/api/books';
+        const method = editingBookId ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody.message || (editingBookId ? '更新失败' : '新增失败'));
+        }
+
+        setBookStatus(editingBookId ? '图书已更新' : '图书已新增', false);
+        await loadBooks();
+        resetBookForm();
+      } catch (error) {
+        setBookStatus(error.message || (editingBookId ? '更新失败' : '新增失败'), true);
+      }
+    }
+
+    function editBook(id) {
+      const book = books.find(b => b.id === id);
+      if (!book) {
+        setBookStatus('图书不存在', true);
+        return;
+      }
+      editingBookId = book.id;
+      titleInput.value = book.title;
+      authorInput.value = book.author;
+      categoryInput.value = book.category;
+      stockInput.value = String(Number.isFinite(Number(book.stock)) ? Number(book.stock) : 0);
+      recommendationIndexInput.value = String(Number.isFinite(Number(book.recommendationIndex)) ? Math.min(5, Math.max(1, Math.round(Number(book.recommendationIndex)))) : 1);
+      imageFileInput.value = '';
+      updateImagePreview(book.image || '');
+      stateInput.value = book.status === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL';
+      saveBookBtn.textContent = '保存修改';
+      cancelEditBtn.hidden = false;
+      setBookStatus('正在编辑图书', false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function deleteBook(id) {
+      try {
+        const res = await fetch(`/api/books/${id}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody.message || '删除失败');
+        }
+        if (editingBookId === id) {
+          resetBookForm();
+        }
+        setBookStatus('图书已删除', false);
+        await loadBooks();
+      } catch (error) {
+        setBookStatus(error.message || '删除失败', true);
+      }
+    }
+
+    loadBooks();
+    updateImagePreview('');
+
+    saveBookBtn.addEventListener('click', upsertBook);
+
+    imageFileInput.addEventListener('change', async () => {
+      const file = imageFileInput.files && imageFileInput.files[0];
+      if (!file) {
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setBookStatus('请选择图片文件', true);
+        imageFileInput.value = '';
+        return;
+      }
+      try {
+        const compressed = await compressImage(file);
+        updateImagePreview(compressed);
+        setBookStatus('图片已压缩并加载，可保存图书', false);
+      } catch (error) {
+        setBookStatus(error.message || '图片读取失败，请重试', true);
+      }
+    });
+
+    cancelEditBtn.addEventListener('click', () => {
+      resetBookForm();
+      setBookStatus('已取消编辑', false);
+    });
+
+    bookListEl.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const btn = target.closest('button[data-action]');
+      if (!btn) {
+        return;
+      }
+      const id = Number(btn.dataset.id);
+      if (!id) {
+        return;
+      }
+      if (btn.dataset.action === 'edit') {
+        editBook(id);
+      }
+      if (btn.dataset.action === 'delete') {
+        deleteBook(id);
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      syncAuthUi();
+      window.location.href = '/login.html';
+    });
+
+    syncAuthUi();
+  </script>
+</body>
+</html>

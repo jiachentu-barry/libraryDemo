@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 借阅总览</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --text: #1f2a44;
+      --muted: #6f7b94;
+      --line: #dbe2f0;
+      --primary: #1a73e8;
+      --primary-dark: #155dc0;
+      --danger: #c53b3b;
+      --ok: #1f8a4c;
+      --warn: #9a6a1a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(140deg, #eff4ff, var(--bg));
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1120px, 94vw);
+      margin: 36px auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.5rem;
+    }
+
+    .top-links {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .top-links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .toolbar button {
+      font: inherit;
+      border-radius: 10px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+      min-width: 220px;
+    }
+
+    .toolbar button {
+      border: 0;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+    }
+
+    .toolbar button:hover {
+      background: var(--primary-dark);
+    }
+
+    .status {
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.92rem;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid var(--line);
+    }
+
+    .status-badge.borrowed {
+      color: var(--ok);
+      background: #ecf9f0;
+      border-color: #cdebd8;
+    }
+
+    .status-badge.returned {
+      color: #5b677f;
+      background: #f1f4fa;
+      border-color: #d5ddeb;
+    }
+
+    .status-badge.overdue {
+      color: var(--warn);
+      background: #fff6e6;
+      border-color: #f0dcb5;
+    }
+
+    .btn-return {
+      border: 0;
+      border-radius: 999px;
+      padding: 6px 12px;
+      color: #fff;
+      background: #60718f;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-return:hover {
+      background: #4d5b73;
+    }
+
+    .btn-return:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .empty {
+      color: var(--muted);
+      margin: 8px 0 0;
+    }
+
+    @media (max-width: 900px) {
+      .responsive-wrap {
+        overflow-x: auto;
+      }
+      table {
+        min-width: 980px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <h1>后台管理 - 借阅总览</h1>
+      <div class="top-links">
+        <a href="/">返回首页</a>
+        <a href="/admin/announcements.html">公告后台</a>
+        <a href="/profile.html">我的借阅页</a>
+      </div>
+      <div class="toolbar">
+        <input id="keyword" type="search" placeholder="搜索用户名、书名、作者" />
+        <select id="statusFilter">
+          <option value="ALL">全部状态</option>
+          <option value="BORROWED">借阅中</option>
+          <option value="OVERDUE">逾期</option>
+          <option value="RETURNED">已归还</option>
+        </select>
+        <button id="refreshBtn" type="button">刷新</button>
+        <p id="status" class="status"></p>
+      </div>
+      <div class="responsive-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用户名</th>
+              <th>书名</th>
+              <th>作者</th>
+              <th>借出时间</th>
+              <th>应还时间</th>
+              <th>归还时间</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="recordList"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty" hidden>暂无借阅记录</p>
+    </section>
+  </div>
+
+  <script>
+    const keywordEl = document.getElementById('keyword');
+    const statusFilterEl = document.getElementById('statusFilter');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusEl = document.getElementById('status');
+    const recordListEl = document.getElementById('recordList');
+    const emptyEl = document.getElementById('empty');
+
+    let records = [];
+
+    function setStatus(message, isError) {
+      statusEl.textContent = message || '';
+      statusEl.className = isError ? 'status error' : 'status ok';
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function statusLabel(status) {
+      if (status === 'BORROWED') return '借阅中';
+      if (status === 'RETURNED') return '已归还';
+      if (status === 'OVERDUE') return '逾期';
+      return status;
+    }
+
+    function statusClass(status) {
+      if (status === 'BORROWED') return 'borrowed';
+      if (status === 'RETURNED') return 'returned';
+      if (status === 'OVERDUE') return 'overdue';
+      return '';
+    }
+
+    function filteredRecords() {
+      const keyword = keywordEl.value.trim().toLowerCase();
+      const statusFilter = statusFilterEl.value;
+      return records.filter((item) => {
+        if (statusFilter !== 'ALL' && item.status !== statusFilter) {
+          return false;
+        }
+        if (!keyword) {
+          return true;
+        }
+        const username = String(item.username || '').toLowerCase();
+        const title = String(item.bookTitle || '').toLowerCase();
+        const author = String(item.bookAuthor || '').toLowerCase();
+        return username.includes(keyword) || title.includes(keyword) || author.includes(keyword);
+      });
+    }
+
+    function render() {
+      const list = filteredRecords();
+      recordListEl.innerHTML = '';
+      emptyEl.hidden = list.length !== 0;
+
+      list.forEach((item) => {
+        const tr = document.createElement('tr');
+        const canForceReturn = item.status === 'BORROWED' || item.status === 'OVERDUE';
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${escapeHtml(item.username)}</td>
+          <td>${escapeHtml(item.bookTitle)}</td>
+          <td>${escapeHtml(item.bookAuthor)}</td>
+          <td>${formatTime(item.borrowedAt)}</td>
+          <td>${formatTime(item.dueDate)}</td>
+          <td>${formatTime(item.returnedAt)}</td>
+          <td><span class="status-badge ${statusClass(item.status)}">${statusLabel(item.status)}</span></td>
+          <td>
+            ${canForceReturn ? `<button class="btn-return" data-id="${item.id}">强制归还</button>` : '-'}
+          </td>
+        `;
+        recordListEl.appendChild(tr);
+      });
+    }
+
+    async function loadRecords() {
+      try {
+        const res = await fetch('/api/admin/borrows');
+        if (!res.ok) {
+          throw new Error('借阅记录加载失败');
+        }
+        const data = await res.json();
+        records = Array.isArray(data) ? data : [];
+        render();
+        setStatus(`共 ${records.length} 条记录`, false);
+      } catch (error) {
+        records = [];
+        render();
+        setStatus('加载失败，请稍后重试', true);
+      }
+    }
+
+    recordListEl.addEventListener('click', async (event) => {
+      const button = event.target.closest('.btn-return');
+      if (!button) {
+        return;
+      }
+      const id = button.getAttribute('data-id');
+      if (!id) {
+        return;
+      }
+      button.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/borrow/${id}/return`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setStatus(data.message || '操作失败', true);
+          button.disabled = false;
+          return;
+        }
+        setStatus(data.message || '归还成功', false);
+        await loadRecords();
+      } catch (error) {
+        setStatus('请求失败，请稍后重试', true);
+        button.disabled = false;
+      }
+    });
+
+    keywordEl.addEventListener('input', render);
+    statusFilterEl.addEventListener('change', render);
+    refreshBtn.addEventListener('click', loadRecords);
+
+    loadRecords();
+  </script>
+</body>
+</html>
