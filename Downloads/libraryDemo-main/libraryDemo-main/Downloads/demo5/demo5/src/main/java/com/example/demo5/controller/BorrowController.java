@@ -1,7 +1,11 @@
 package com.example.demo5.controller;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.demo5.entity.AppUser;
 import com.example.demo5.entity.Book;
@@ -146,6 +150,43 @@ public class BorrowController {
         return ResponseEntity.ok(new ApiMessage("归还成功"));
     }
 
+        /** 借阅统计（昨日、今日、借阅最多图书） */
+        @GetMapping("/borrow/stats")
+        public BorrowStatsResponse borrowStats() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = today.atStartOfDay();
+        LocalDateTime tomorrowStart = today.plusDays(1).atStartOfDay();
+        LocalDateTime yesterdayStart = today.minusDays(1).atStartOfDay();
+
+        long yesterdayBorrowCount = borrowRepository
+            .findByBorrowedAtGreaterThanEqualAndBorrowedAtLessThanOrderByBorrowedAtAsc(yesterdayStart, todayStart)
+            .size();
+
+        long todayBorrowCount = borrowRepository
+            .findByBorrowedAtGreaterThanEqualAndBorrowedAtLessThanOrderByBorrowedAtAsc(todayStart, tomorrowStart)
+            .size();
+
+        Map<String, Long> grouped = borrowRepository.findAllByOrderByBorrowedAtDesc().stream()
+            .filter(r -> r.getBook() != null && r.getBook().getTitle() != null)
+            .map(r -> r.getBook().getTitle().trim())
+            .filter(title -> !title.isEmpty())
+            .collect(Collectors.groupingBy(title -> title, Collectors.counting()));
+
+        Map.Entry<String, Long> top = grouped.entrySet().stream()
+            .max(Comparator.comparingLong(Map.Entry::getValue))
+            .orElse(null);
+
+        String mostBorrowedBookName = top == null ? "暂无数据" : top.getKey();
+        long mostBorrowedBookCount = top == null ? 0L : top.getValue();
+
+        return new BorrowStatsResponse(
+            yesterdayBorrowCount,
+            todayBorrowCount,
+            mostBorrowedBookName,
+            mostBorrowedBookCount
+        );
+        }
+
     private BorrowRecordResponse toResponse(BorrowRecord r) {
         boolean overdue = r.getStatus() == BorrowStatus.BORROWED
                 && r.getDueDate() != null
@@ -181,4 +222,11 @@ public class BorrowController {
             BorrowStatus status,
             boolean overdue
     ) {}
+
+            record BorrowStatsResponse(
+                long yesterdayBorrowCount,
+                long todayBorrowCount,
+                String mostBorrowedBookName,
+                long mostBorrowedBookCount
+            ) {}
 }

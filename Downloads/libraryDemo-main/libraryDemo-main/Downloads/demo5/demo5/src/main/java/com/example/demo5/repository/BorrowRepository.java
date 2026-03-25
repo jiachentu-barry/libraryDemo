@@ -1,5 +1,6 @@
 package com.example.demo5.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.demo5.entity.AppUser;
@@ -14,6 +15,10 @@ public interface BorrowRepository extends JpaRepository<BorrowRecord, Long> {
     List<BorrowRecord> findByUserOrderByBorrowedAtDesc(AppUser user);
 
     List<BorrowRecord> findAllByOrderByBorrowedAtDesc();
+
+    List<BorrowRecord> findByBorrowedAtGreaterThanEqualAndBorrowedAtLessThanOrderByBorrowedAtAsc(
+            LocalDateTime start,
+            LocalDateTime end);
 
     boolean existsByUserAndBookAndStatus(AppUser user, Book book, BorrowStatus status);
 }

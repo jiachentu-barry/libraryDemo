@@ -232,8 +232,128 @@
       font-size: 0.82rem;
     }
 
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 8px 0 14px;
+    }
+
+    .stat-card {
+      background: linear-gradient(160deg, #ffffff 0%, #f4f9f6 100%);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 80px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--subtle);
+      margin: 0 0 6px;
+    }
+
+    .stat-value {
+      margin: 0;
+      font-size: 1.16rem;
+      font-weight: 800;
+      color: var(--accent-2);
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .stat-meta {
+      margin: 4px 0 0;
+      font-size: 0.76rem;
+      color: var(--subtle);
+    }
+
     .search-row {
       margin: 10px 0 14px;
+    }
+
+    .review-box {
+      margin: 8px 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(160deg, #fffefc 0%, #f7f4ec 100%);
+      padding: 12px;
+    }
+
+    .review-form {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr 1.2fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .review-form select,
+    .review-form input,
+    .review-form button {
+      font: inherit;
+      border-radius: 10px;
+    }
+
+    .review-form select,
+    .review-form input {
+      height: 36px;
+      border: 1px solid var(--line);
+      padding: 0 10px;
+      background: #fff;
+      color: var(--ink);
+      min-width: 0;
+    }
+
+    .review-form button {
+      height: 36px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      padding: 0 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .review-form button:hover {
+      background: var(--accent-2);
+    }
+
+    .review-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .review-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px 10px;
+    }
+
+    .review-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+      font-size: 0.84rem;
+      color: var(--subtle);
+    }
+
+    .review-book {
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .review-comment {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: var(--ink);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .search-input {
@@ -613,6 +733,8 @@
       .content { grid-template-columns: 1fr; }
       .panel-sticky { position: static; max-height: none; }
       .book-card-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: 1fr; }
+      .review-form { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 500px) {
@@ -660,6 +782,27 @@
       <section class="panel">
         <h2 class="section-title">图书列表</h2>
         <p class="section-sub">全部馆藏图书展示。</p>
+        <div id="borrow-stats" class="stats-grid" aria-live="polite"></div>
+        <div class="review-box">
+          <div class="section-title-row">
+            <h3 class="section-title">图书评价</h3>
+            <button class="refresh-btn" id="refresh-reviews" type="button">刷新评价</button>
+          </div>
+          <p class="section-sub">可对图书打分（1-5）并填写简短评价。</p>
+          <form id="review-form" class="review-form">
+            <select id="review-book" required></select>
+            <select id="review-rating" required>
+              <option value="5">5 分</option>
+              <option value="4">4 分</option>
+              <option value="3">3 分</option>
+              <option value="2">2 分</option>
+              <option value="1">1 分</option>
+            </select>
+            <input id="review-comment" maxlength="400" placeholder="写下你的评价（最多 400 字）" />
+            <button id="submit-review" type="submit">发布评价</button>
+          </form>
+          <div id="review-list" class="review-list"></div>
+        </div>
         <div class="search-row">
           <input id="book-search" class="search-input" type="search" placeholder="搜索书名、作者、分类" />
         </div>
@@ -674,6 +817,12 @@
     const recommendedListEl = document.getElementById('recommended-list');
     const announcementListEl = document.getElementById('announcement-list');
     const bookSearchEl = document.getElementById('book-search');
+    const borrowStatsEl = document.getElementById('borrow-stats');
+    const reviewFormEl = document.getElementById('review-form');
+    const reviewBookEl = document.getElementById('review-book');
+    const reviewRatingEl = document.getElementById('review-rating');
+    const reviewCommentEl = document.getElementById('review-comment');
+    const reviewListEl = document.getElementById('review-list');
     const navUserEl = document.getElementById('nav-user');
     const navLogoutEl = document.getElementById('nav-logout');
 
@@ -842,6 +991,101 @@
       });
     }
 
+    function renderBorrowStats(stats) {
+      const safe = stats || {};
+      const yesterday = Number.isFinite(Number(safe.yesterdayBorrowCount)) ? Number(safe.yesterdayBorrowCount) : 0;
+      const today = Number.isFinite(Number(safe.todayBorrowCount)) ? Number(safe.todayBorrowCount) : 0;
+      const topName = safe.mostBorrowedBookName ? String(safe.mostBorrowedBookName) : '暂无数据';
+      const topCount = Number.isFinite(Number(safe.mostBorrowedBookCount)) ? Number(safe.mostBorrowedBookCount) : 0;
+
+      borrowStatsEl.innerHTML = `
+        <article class="stat-card">
+          <p class="stat-label">昨日借阅数</p>
+          <p class="stat-value">${formatInt(yesterday)}</p>
+          <p class="stat-meta">按借出时间统计</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-label">今日借阅数</p>
+          <p class="stat-value">${formatInt(today)}</p>
+          <p class="stat-meta">实时刷新</p>
+        </article>
+        <article class="stat-card">
+          <p class="stat-label">借阅最多图书</p>
+          <p class="stat-value">${escapeHtml(topName)}</p>
+          <p class="stat-meta">累计借阅 ${formatInt(topCount)} 次</p>
+        </article>
+      `;
+    }
+
+    function reviewStarText(value) {
+      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
+      return `${'★'.repeat(score)}${'☆'.repeat(5 - score)}`;
+    }
+
+    function updateReviewBookOptions() {
+      if (!books.length) {
+        reviewBookEl.innerHTML = '<option value="">暂无图书</option>';
+        reviewBookEl.disabled = true;
+        return;
+      }
+      reviewBookEl.disabled = false;
+      const previous = reviewBookEl.value;
+      reviewBookEl.innerHTML = books
+        .map((b) => `<option value="${b.id}">${escapeHtml(b.title)} · ${escapeHtml(b.author)}</option>`)
+        .join('');
+      if (previous && books.some((b) => String(b.id) === String(previous))) {
+        reviewBookEl.value = previous;
+      }
+    }
+
+    function renderReviews(items) {
+      const list = Array.isArray(items) ? items.slice(0, 12) : [];
+      if (!list.length) {
+        reviewListEl.innerHTML = '<p class="empty">暂无评价，快来写下第一条吧。</p>';
+        return;
+      }
+      reviewListEl.innerHTML = list.map((r) => `
+        <article class="review-item">
+          <div class="review-head">
+            <span class="review-book">${escapeHtml(r.bookTitle)}</span>
+            <span>${escapeHtml(r.username)} · ${reviewStarText(r.rating)} · ${formatTime(r.createdAt)}</span>
+          </div>
+          <p class="review-comment">${escapeHtml(r.comment || '（未填写文字评价）')}</p>
+        </article>
+      `).join('');
+    }
+
+    async function loadReviews() {
+      try {
+        const res = await fetch('/api/reviews');
+        if (!res.ok) {
+          throw new Error('评价加载失败');
+        }
+        const data = await res.json();
+        renderReviews(Array.isArray(data) ? data : []);
+      } catch (error) {
+        reviewListEl.innerHTML = '<p class="empty">评价加载失败，请稍后重试。</p>';
+      }
+    }
+
+    async function loadBorrowStats() {
+      try {
+        const res = await fetch('/api/borrow/stats');
+        if (!res.ok) {
+          throw new Error('统计加载失败');
+        }
+        const data = await res.json();
+        renderBorrowStats(data);
+      } catch (error) {
+        renderBorrowStats({
+          yesterdayBorrowCount: 0,
+          todayBorrowCount: 0,
+          mostBorrowedBookName: '加载失败',
+          mostBorrowedBookCount: 0
+        });
+      }
+    }
+
     function borrowBtnHtml(book) {
       const username = localStorage.getItem(STORAGE_KEY) || '';
       if (!username) return '';
@@ -883,10 +1127,12 @@
         }
         const data = await res.json();
         books = Array.isArray(data) ? data : [];
+        updateReviewBookOptions();
         renderBooks();
         renderRecommendedBooks();
       } catch (error) {
         books = [];
+        updateReviewBookOptions();
         renderBooks();
         renderRecommendedBooks();
       }
@@ -924,6 +1170,7 @@
         }
         await loadBooks();
         await loadUserBorrows();
+        await loadBorrowStats();
       } catch (err) {
         alert('请求失败，请稍后重试');
       } finally {
@@ -969,6 +1216,8 @@
 
     loadBooks().then(() => loadUserBorrows());
     loadAnnouncements();
+    loadBorrowStats();
+    loadReviews();
 
     bookSearchEl.addEventListener('input', () => {
       bookKeyword = bookSearchEl.value || '';
@@ -977,6 +1226,47 @@
 
     document.getElementById('refresh-recommended').addEventListener('click', () => {
       renderRecommendedBooks();
+    });
+
+    document.getElementById('refresh-reviews').addEventListener('click', () => {
+      loadReviews();
+    });
+
+    reviewFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      if (!username) {
+        alert('请先登录后再发布评价');
+        window.location.href = '/login.html';
+        return;
+      }
+      const bookId = Number(reviewBookEl.value || 0);
+      const rating = Number(reviewRatingEl.value || 0);
+      const comment = (reviewCommentEl.value || '').trim();
+      if (!bookId) {
+        alert('请选择图书');
+        return;
+      }
+      const submitBtn = document.getElementById('submit-review');
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, bookId, rating, comment })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.message || '发布评价失败');
+          return;
+        }
+        reviewCommentEl.value = '';
+        await loadReviews();
+      } catch (error) {
+        alert('请求失败，请稍后重试');
+      } finally {
+        submitBtn.disabled = false;
+      }
     });
 
     navLogoutEl.addEventListener('click', () => {
