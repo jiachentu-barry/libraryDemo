@@ -356,6 +356,21 @@
       word-break: break-word;
     }
 
+    .book-detail-review-box {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .book-detail-review-box .review-form {
+      grid-template-columns: 0.7fr 1.6fr auto;
+      margin-bottom: 12px;
+    }
+
+    .book-detail-review-box .section-sub {
+      margin-bottom: 10px;
+    }
+
     .search-input {
       width: 100%;
       height: 38px;
@@ -515,6 +530,49 @@
       gap: 16px;
     }
 
+    .book-pagination {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-width: 34px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--subtle);
+      cursor: pointer;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .page-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .page-btn.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .page-btn:disabled {
+      border-color: var(--line);
+      color: #a8ada2;
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+
     .book-card {
       background: #fff;
       border: 1px solid var(--line);
@@ -523,11 +581,17 @@
       display: flex;
       flex-direction: column;
       animation: reveal 380ms ease both;
-      transition: transform 220ms, box-shadow 220ms;
+      transition: transform 220ms, box-shadow 220ms, border-color 220ms;
+      cursor: pointer;
     }
 
     .book-card:hover {
       transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .book-card.is-active {
+      border-color: rgba(42, 98, 71, 0.45);
       box-shadow: var(--shadow-lg);
     }
 
@@ -591,12 +655,11 @@
     }
 
     .book-card-body {
-      padding: 13px 13px 10px;
-      flex: 1;
+      padding: 13px 13px 14px;
     }
 
     .book-card-title {
-      margin: 0 0 6px;
+      margin: 0;
       font-size: 0.96rem;
       line-height: 1.45;
       display: -webkit-box;
@@ -606,26 +669,136 @@
       overflow: hidden;
     }
 
-    .book-card-meta {
-      margin: 0 0 2px;
-      color: var(--subtle);
+    .book-card-rating {
+      margin-top: 8px;
       font-size: 0.8rem;
+      color: var(--subtle);
     }
 
-    .book-card-footer {
+    .book-detail-panel {
+      margin: 0 0 18px;
+    }
+
+    .book-detail-card {
+      background: linear-gradient(160deg, #fffefb 0%, #f5f1e7 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: reveal 260ms ease both;
+    }
+
+    .book-detail-layout {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .book-detail-cover-wrap {
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #f4eedd, #ede5d5);
+      border-right: 1px solid var(--line);
+      padding: 18px;
+    }
+
+    .book-detail-cover {
+      width: 140px;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+      border-radius: 4px;
+      box-shadow: 4px 6px 16px rgba(0,0,0,0.18);
+    }
+
+    .book-detail-cover-empty {
+      width: 140px;
+      height: 200px;
+      display: grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.82rem;
+      background: #f8f4ec;
+      border: 1px dashed var(--line);
+      border-radius: 4px;
+    }
+
+    .book-detail-main {
+      min-width: 0;
+    }
+
+    .book-detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .book-detail-title {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+      line-height: 1.4;
+      color: var(--accent-2);
+    }
+
+    .book-detail-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+      margin-bottom: 16px;
+    }
+
+    .book-detail-meta {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .book-detail-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 13px;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 14px;
       border-top: 1px solid var(--line);
-      background: linear-gradient(to right, #faf7f0, #f4f0e6);
     }
 
-    .book-card-price {
+    .book-detail-price {
       font-weight: 800;
       color: var(--accent-2);
       font-size: 1.02rem;
       letter-spacing: 0.02em;
+    }
+
+    .book-detail-action-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .book-detail-close {
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--subtle);
+      cursor: pointer;
+    }
+
+    .book-detail-close:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     /* ── Chips ── */
@@ -697,6 +870,11 @@
       color: #fff;
     }
 
+    .book-card:focus-visible {
+      outline: 3px solid rgba(42, 98, 71, 0.22);
+      outline-offset: 3px;
+    }
+
     .borrow-btn:disabled {
       border-color: var(--line);
       background: #f5f5f5;
@@ -735,6 +913,9 @@
       .book-card-grid { grid-template-columns: repeat(2, 1fr); }
       .stats-grid { grid-template-columns: 1fr; }
       .review-form { grid-template-columns: 1fr; }
+      .book-detail-layout { grid-template-columns: 1fr; }
+      .book-detail-cover-wrap { border-right: none; border-bottom: 1px solid var(--line); }
+      .book-detail-meta-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 500px) {
@@ -783,30 +964,12 @@
         <h2 class="section-title">图书列表</h2>
         <p class="section-sub">全部馆藏图书展示。</p>
         <div id="borrow-stats" class="stats-grid" aria-live="polite"></div>
-        <div class="review-box">
-          <div class="section-title-row">
-            <h3 class="section-title">图书评价</h3>
-            <button class="refresh-btn" id="refresh-reviews" type="button">刷新评价</button>
-          </div>
-          <p class="section-sub">可对图书打分（1-5）并填写简短评价。</p>
-          <form id="review-form" class="review-form">
-            <select id="review-book" required></select>
-            <select id="review-rating" required>
-              <option value="5">5 分</option>
-              <option value="4">4 分</option>
-              <option value="3">3 分</option>
-              <option value="2">2 分</option>
-              <option value="1">1 分</option>
-            </select>
-            <input id="review-comment" maxlength="400" placeholder="写下你的评价（最多 400 字）" />
-            <button id="submit-review" type="submit">发布评价</button>
-          </form>
-          <div id="review-list" class="review-list"></div>
-        </div>
         <div class="search-row">
           <input id="book-search" class="search-input" type="search" placeholder="搜索书名、作者、分类" />
         </div>
+        <div id="book-detail-panel" class="book-detail-panel" hidden></div>
         <div id="book-list" class="book-card-grid"></div>
+        <div id="book-pagination" class="book-pagination" hidden></div>
       </section>
     </div>
   </div>
@@ -817,17 +980,18 @@
     const recommendedListEl = document.getElementById('recommended-list');
     const announcementListEl = document.getElementById('announcement-list');
     const bookSearchEl = document.getElementById('book-search');
+    const bookDetailPanelEl = document.getElementById('book-detail-panel');
+    const bookPaginationEl = document.getElementById('book-pagination');
     const borrowStatsEl = document.getElementById('borrow-stats');
-    const reviewFormEl = document.getElementById('review-form');
-    const reviewBookEl = document.getElementById('review-book');
-    const reviewRatingEl = document.getElementById('review-rating');
-    const reviewCommentEl = document.getElementById('review-comment');
-    const reviewListEl = document.getElementById('review-list');
     const navUserEl = document.getElementById('nav-user');
     const navLogoutEl = document.getElementById('nav-logout');
 
+    const BOOKS_PER_PAGE = 6;
     let books = [];
+    let reviews = [];
     let bookKeyword = '';
+    let currentBookPage = 1;
+    let selectedBookId = null;
     let activeBorrowMap = {}; // bookId -> borrowRecordId
 
     function syncAuthUi() {
@@ -951,22 +1115,69 @@
       });
     }
 
+    function renderBookPagination(totalPages) {
+      if (totalPages <= 1) {
+        bookPaginationEl.hidden = true;
+        bookPaginationEl.innerHTML = '';
+        return;
+      }
+
+      const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+        .map((page) => `<button class="page-btn${page === currentBookPage ? ' active' : ''}" type="button" data-page="${page}">${page}</button>`)
+        .join('');
+
+      bookPaginationEl.hidden = false;
+      bookPaginationEl.innerHTML = `
+        <button class="page-btn" type="button" data-action="prev" ${currentBookPage === 1 ? 'disabled' : ''}>上一页</button>
+        ${pages}
+        <button class="page-btn" type="button" data-action="next" ${currentBookPage === totalPages ? 'disabled' : ''}>下一页</button>
+      `;
+    }
+
     function renderBooks() {
       const list = getFilteredBooks();
+      if (!list.some((book) => String(book.id) === String(selectedBookId))) {
+        selectedBookId = null;
+      }
       bookListEl.innerHTML = '';
       if (!books.length) {
         bookListEl.innerHTML = '<p class="empty">暂无图书</p>';
+        bookPaginationEl.hidden = true;
+        bookPaginationEl.innerHTML = '';
+        renderBookDetail();
         return;
       }
 
       if (!list.length) {
         bookListEl.innerHTML = '<p class="empty">未找到匹配的图书</p>';
+        bookPaginationEl.hidden = true;
+        bookPaginationEl.innerHTML = '';
+        renderBookDetail();
         return;
       }
 
-      list.forEach((book) => {
+      const totalPages = Math.max(1, Math.ceil(list.length / BOOKS_PER_PAGE));
+      if (currentBookPage > totalPages) {
+        currentBookPage = totalPages;
+      }
+      if (currentBookPage < 1) {
+        currentBookPage = 1;
+      }
+
+      const startIndex = (currentBookPage - 1) * BOOKS_PER_PAGE;
+      const visibleBooks = list.slice(startIndex, startIndex + BOOKS_PER_PAGE);
+      if (!visibleBooks.some((book) => String(book.id) === String(selectedBookId))) {
+        selectedBookId = null;
+      }
+
+      visibleBooks.forEach((book) => {
         const card = document.createElement('article');
-        card.className = `book-card${isBorrowable(book.stock) ? '' : ' unavailable'}`;
+        const isActive = String(selectedBookId) === String(book.id);
+        card.className = `book-card${isBorrowable(book.stock) ? '' : ' unavailable'}${isActive ? ' is-active' : ''}`;
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+        card.dataset.bookId = String(book.id);
         const innerImg = book.image
           ? `<img class="book-card-img" src="${escapeHtml(book.image)}" alt="${escapeHtml(book.title)}" loading="lazy" />`
           : `<div class="book-card-img-empty">暂无封面</div>`;
@@ -975,20 +1186,192 @@
           ${imgHtml}
           <div class="book-card-body">
             <h3 class="book-card-title">${escapeHtml(book.title)}</h3>
-            <p class="book-card-meta">作者：${escapeHtml(book.author)}</p>
-            <p class="book-card-meta">分类：${escapeHtml(book.category)}</p>
-            <p class="book-card-meta">推荐指数：${starText(book.recommendationIndex)}</p>
-          </div>
-          <div class="book-card-footer">
-            <span class="book-card-price">库存：${formatInt(book.stock)}</span>
-            <div style="display:flex;gap:6px;align-items:center">
-              ${borrowStatusHtml(book.stock)}
-              ${borrowBtnHtml(book)}
-            </div>
+            <p class="book-card-rating">推荐指数：${starText(book.recommendationIndex)}</p>
           </div>
         `;
         bookListEl.appendChild(card);
       });
+
+      renderBookPagination(totalPages);
+      renderBookDetail();
+    }
+
+    function detailCoverHtml(book) {
+      if (!book.image) {
+        return '<div class="book-detail-cover-empty">暂无封面</div>';
+      }
+      return `<img class="book-detail-cover" src="${escapeHtml(book.image)}" alt="${escapeHtml(book.title)}" loading="lazy" />`;
+    }
+
+    function reviewListHtml(book) {
+      const list = getReviewsForBook(book.id);
+      if (!list.length) {
+        return '<p class="empty">这本书还没有评论，欢迎留下第一条。</p>';
+      }
+      return `
+        <div class="review-list">
+          ${list.map((r) => `
+            <article class="review-item">
+              <div class="review-head">
+                <span class="review-book">${escapeHtml(r.username)}</span>
+                <span>${reviewStarText(r.rating)} · ${formatTime(r.createdAt)}</span>
+              </div>
+              <p class="review-comment">${escapeHtml(r.comment || '（未填写文字评价）')}</p>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderBookDetail() {
+      if (selectedBookId == null) {
+        bookDetailPanelEl.hidden = true;
+        bookDetailPanelEl.innerHTML = '';
+        return;
+      }
+      const book = books.find((item) => String(item.id) === String(selectedBookId));
+      if (!book) {
+        selectedBookId = null;
+        bookDetailPanelEl.hidden = true;
+        bookDetailPanelEl.innerHTML = '';
+        return;
+      }
+      bookDetailPanelEl.hidden = false;
+      bookDetailPanelEl.innerHTML = `
+        <article class="book-detail-card">
+          <div class="book-detail-layout">
+            <div class="book-detail-cover-wrap">
+              ${detailCoverHtml(book)}
+            </div>
+            <div class="book-detail-main">
+              <div class="book-detail-head">
+                <div>
+                  <h3 class="book-detail-title">${escapeHtml(book.title)}</h3>
+                  <p class="book-detail-meta">点击其他图书卡片可切换详情</p>
+                </div>
+                <button class="book-detail-close" type="button" data-action="close-book-detail">关闭</button>
+              </div>
+              <div class="book-detail-meta-grid">
+                <p class="book-detail-meta">作者：${escapeHtml(book.author)}</p>
+                <p class="book-detail-meta">分类：${escapeHtml(book.category)}</p>
+                <p class="book-detail-meta">馆藏类型：<span class="book-chip ${stateClass(book.status)}">${stateLabel(book.status)}</span></p>
+                <p class="book-detail-meta">推荐指数：${starText(book.recommendationIndex)}</p>
+              </div>
+              <div class="book-detail-footer">
+                <span class="book-detail-price">库存：${formatInt(book.stock)}</span>
+                <div class="book-detail-action-row">
+                  ${borrowStatusHtml(book.stock)}
+                  ${borrowBtnHtml(book)}
+                </div>
+              </div>
+              <div class="book-detail-review-box">
+                <div class="section-title-row">
+                  <h3 class="section-title">图书评论</h3>
+                  <button class="refresh-btn" type="button" data-action="refresh-reviews">刷新评论</button>
+                </div>
+                <p class="section-sub">这本书的评论会显示在当前详情卡片下方。</p>
+                <form class="review-form" data-action="submit-review">
+                  <select name="rating" required>
+                    <option value="5">5 分</option>
+                    <option value="4">4 分</option>
+                    <option value="3">3 分</option>
+                    <option value="2">2 分</option>
+                    <option value="1">1 分</option>
+                  </select>
+                  <input name="comment" maxlength="400" placeholder="写下你的评价（最多 400 字）" />
+                  <button type="submit" data-role="submit-review">发布评价</button>
+                </form>
+                ${reviewListHtml(book)}
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function toggleBookCard(bookId) {
+      const id = String(bookId || '');
+      if (!id) {
+        return;
+      }
+      selectedBookId = String(selectedBookId) === id ? null : id;
+      renderBooks();
+    }
+
+    async function handleBorrowAction(btn) {
+      if (!btn || btn.disabled) return;
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      if (!username) {
+        alert('请先登录');
+        window.location.href = '/login.html';
+        return;
+      }
+      const borrowId = btn.dataset.borrowId;
+      const bookId = btn.dataset.bookId;
+      btn.disabled = true;
+      try {
+        if (borrowId) {
+          const res = await fetch(`/api/borrow/${borrowId}/return`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+          });
+          const data = await res.json();
+          if (!res.ok) { alert(data.message || '归还失败'); return; }
+        } else if (bookId) {
+          const res = await fetch('/api/borrow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, bookId: Number(bookId) })
+          });
+          const data = await res.json();
+          if (!res.ok) { alert(data.message || '借阅失败'); return; }
+        }
+        await loadBooks();
+        await loadUserBorrows();
+        await loadBorrowStats();
+      } catch (err) {
+        alert('请求失败，请稍后重试');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function submitReview(form) {
+      const username = localStorage.getItem(STORAGE_KEY) || '';
+      if (!username) {
+        alert('请先登录后再发布评价');
+        window.location.href = '/login.html';
+        return;
+      }
+      const bookId = Number(selectedBookId || 0);
+      const rating = Number(form.elements.rating.value || 0);
+      const comment = String(form.elements.comment.value || '').trim();
+      if (!bookId) {
+        alert('请先选择图书');
+        return;
+      }
+      const submitBtn = form.querySelector('[data-role="submit-review"]');
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, bookId, rating, comment })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.message || '发布评价失败');
+          return;
+        }
+        form.reset();
+        form.elements.rating.value = '5';
+        await loadReviews();
+      } catch (error) {
+        alert('请求失败，请稍后重试');
+      } finally {
+        submitBtn.disabled = false;
+      }
     }
 
     function renderBorrowStats(stats) {
@@ -1022,37 +1405,14 @@
       return `${'★'.repeat(score)}${'☆'.repeat(5 - score)}`;
     }
 
-    function updateReviewBookOptions() {
-      if (!books.length) {
-        reviewBookEl.innerHTML = '<option value="">暂无图书</option>';
-        reviewBookEl.disabled = true;
-        return;
-      }
-      reviewBookEl.disabled = false;
-      const previous = reviewBookEl.value;
-      reviewBookEl.innerHTML = books
-        .map((b) => `<option value="${b.id}">${escapeHtml(b.title)} · ${escapeHtml(b.author)}</option>`)
-        .join('');
-      if (previous && books.some((b) => String(b.id) === String(previous))) {
-        reviewBookEl.value = previous;
-      }
+    function getReviewsForBook(bookId) {
+      return reviews.filter((item) => String(item.bookId) === String(bookId)).slice(0, 8);
     }
 
     function renderReviews(items) {
       const list = Array.isArray(items) ? items.slice(0, 12) : [];
-      if (!list.length) {
-        reviewListEl.innerHTML = '<p class="empty">暂无评价，快来写下第一条吧。</p>';
-        return;
-      }
-      reviewListEl.innerHTML = list.map((r) => `
-        <article class="review-item">
-          <div class="review-head">
-            <span class="review-book">${escapeHtml(r.bookTitle)}</span>
-            <span>${escapeHtml(r.username)} · ${reviewStarText(r.rating)} · ${formatTime(r.createdAt)}</span>
-          </div>
-          <p class="review-comment">${escapeHtml(r.comment || '（未填写文字评价）')}</p>
-        </article>
-      `).join('');
+      reviews = list;
+      renderBookDetail();
     }
 
     async function loadReviews() {
@@ -1064,7 +1424,8 @@
         const data = await res.json();
         renderReviews(Array.isArray(data) ? data : []);
       } catch (error) {
-        reviewListEl.innerHTML = '<p class="empty">评价加载失败，请稍后重试。</p>';
+        reviews = [];
+        renderBookDetail();
       }
     }
 
@@ -1127,12 +1488,10 @@
         }
         const data = await res.json();
         books = Array.isArray(data) ? data : [];
-        updateReviewBookOptions();
         renderBooks();
         renderRecommendedBooks();
       } catch (error) {
         books = [];
-        updateReviewBookOptions();
         renderBooks();
         renderRecommendedBooks();
       }
@@ -1140,42 +1499,74 @@
 
     bookListEl.addEventListener('click', async (e) => {
       const btn = e.target.closest('.borrow-btn');
-      if (!btn || btn.disabled) return;
-      const username = localStorage.getItem(STORAGE_KEY) || '';
-      if (!username) {
-        alert('请先登录');
-        window.location.href = '/login.html';
+      if (btn) {
+        await handleBorrowAction(btn);
         return;
       }
-      const borrowId = btn.dataset.borrowId;
-      const bookId = btn.dataset.bookId;
-      btn.disabled = true;
-      try {
-        if (borrowId) {
-          const res = await fetch(`/api/borrow/${borrowId}/return`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username })
-          });
-          const data = await res.json();
-          if (!res.ok) { alert(data.message || '归还失败'); return; }
-        } else if (bookId) {
-          const res = await fetch('/api/borrow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, bookId: Number(bookId) })
-          });
-          const data = await res.json();
-          if (!res.ok) { alert(data.message || '借阅失败'); return; }
-        }
-        await loadBooks();
-        await loadUserBorrows();
-        await loadBorrowStats();
-      } catch (err) {
-        alert('请求失败，请稍后重试');
-      } finally {
-        btn.disabled = false;
+      const card = e.target.closest('.book-card');
+      if (!card) {
+        return;
       }
+      toggleBookCard(card.dataset.bookId);
+    });
+
+    bookDetailPanelEl.addEventListener('click', async (e) => {
+      const closeBtn = e.target.closest('[data-action="close-book-detail"]');
+      if (closeBtn) {
+        selectedBookId = null;
+        renderBooks();
+        return;
+      }
+      const refreshBtn = e.target.closest('[data-action="refresh-reviews"]');
+      if (refreshBtn) {
+        await loadReviews();
+        return;
+      }
+      const borrowBtn = e.target.closest('.borrow-btn');
+      if (borrowBtn) {
+        await handleBorrowAction(borrowBtn);
+      }
+    });
+
+    bookDetailPanelEl.addEventListener('submit', async (e) => {
+      const form = e.target.closest('form[data-action="submit-review"]');
+      if (!form) {
+        return;
+      }
+      e.preventDefault();
+      await submitReview(form);
+    });
+
+    bookListEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') {
+        return;
+      }
+      const card = e.target.closest('.book-card');
+      if (!card) {
+        return;
+      }
+      e.preventDefault();
+      toggleBookCard(card.dataset.bookId);
+    });
+
+    bookPaginationEl.addEventListener('click', (e) => {
+      const target = e.target.closest('button');
+      if (!target || target.disabled) {
+        return;
+      }
+      const list = getFilteredBooks();
+      const totalPages = Math.max(1, Math.ceil(list.length / BOOKS_PER_PAGE));
+      if (target.dataset.action === 'prev') {
+        currentBookPage = Math.max(1, currentBookPage - 1);
+      } else if (target.dataset.action === 'next') {
+        currentBookPage = Math.min(totalPages, currentBookPage + 1);
+      } else if (target.dataset.page) {
+        const nextPage = Number(target.dataset.page);
+        if (Number.isFinite(nextPage) && nextPage >= 1 && nextPage <= totalPages) {
+          currentBookPage = nextPage;
+        }
+      }
+      renderBooks();
     });
 
     function renderAnnouncements(items) {
@@ -1221,52 +1612,12 @@
 
     bookSearchEl.addEventListener('input', () => {
       bookKeyword = bookSearchEl.value || '';
+      currentBookPage = 1;
       renderBooks();
     });
 
     document.getElementById('refresh-recommended').addEventListener('click', () => {
       renderRecommendedBooks();
-    });
-
-    document.getElementById('refresh-reviews').addEventListener('click', () => {
-      loadReviews();
-    });
-
-    reviewFormEl.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = localStorage.getItem(STORAGE_KEY) || '';
-      if (!username) {
-        alert('请先登录后再发布评价');
-        window.location.href = '/login.html';
-        return;
-      }
-      const bookId = Number(reviewBookEl.value || 0);
-      const rating = Number(reviewRatingEl.value || 0);
-      const comment = (reviewCommentEl.value || '').trim();
-      if (!bookId) {
-        alert('请选择图书');
-        return;
-      }
-      const submitBtn = document.getElementById('submit-review');
-      submitBtn.disabled = true;
-      try {
-        const res = await fetch('/api/reviews', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, bookId, rating, comment })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          alert(data.message || '发布评价失败');
-          return;
-        }
-        reviewCommentEl.value = '';
-        await loadReviews();
-      } catch (error) {
-        alert('请求失败，请稍后重试');
-      } finally {
-        submitBtn.disabled = false;
-      }
     });
 
     navLogoutEl.addEventListener('click', () => {

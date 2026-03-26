@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>图书管理中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg-1: #f6f2e7;
@@ -60,14 +61,91 @@
       color: var(--subtle);
     }
 
-    .links {
+    .admin-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+
+    .nav-group-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--subtle);
+      font-weight: 700;
+      padding: 10px 0 6px 14px;
+      margin-bottom: 2px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-group-label:not(:first-child) {
+      margin-top: 8px;
+    }
+
+    .admin-nav a {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #414d3e;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 3px solid transparent;
+      background: transparent;
+      transition: border-color 140ms, color 140ms, background 140ms;
+    }
+
+    .admin-nav a::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.25;
+      flex-shrink: 0;
+      transition: opacity 140ms, transform 140ms;
+    }
+
+    .admin-nav a:hover {
+      border-left-color: var(--accent);
+      color: var(--accent);
+      background: #ecf5ef;
+    }
+
+    .admin-nav a:hover::before {
+      opacity: 1;
+      transform: scale(1.3);
+    }
+
+    .admin-nav a.active {
+      border-left-color: var(--accent);
+      color: var(--accent-2);
+      background: #dff0e6;
+      font-weight: 700;
+    }
+
+    .admin-nav a.active::before {
+      opacity: 1;
+      background: var(--accent);
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: var(--line);
+      margin: 6px 0;
+    }
+
+    .utility-links {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 8px;
     }
 
-    .links a {
+    .utility-links a {
       color: var(--accent);
       text-decoration: none;
       font-weight: 700;
@@ -187,39 +265,111 @@
       color: var(--danger);
     }
 
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fffefb 0%, #f8f4ea 100%);
+      padding: 8px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      overflow-x: auto;
+    }
+
+    .table-pagination {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--subtle);
+      cursor: pointer;
+      transition: border-color 180ms, background 180ms, color 180ms;
+    }
+
+    .page-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #eef6f0;
+    }
+
+    .page-btn.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .page-btn:disabled {
+      border-color: var(--line);
+      background: #f5f5f5;
+      color: #a8ada2;
+      cursor: not-allowed;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      overflow: hidden;
       border-radius: 12px;
       border: 1px solid var(--line);
       background: #fff;
+      overflow: hidden;
     }
 
     th,
     td {
       text-align: left;
-      padding: 10px;
+      padding: 11px 10px;
       border-bottom: 1px solid var(--line);
-      font-size: 0.96rem;
+      font-size: 0.92rem;
       vertical-align: top;
     }
 
     th {
-      background: #f4efdf;
-      font-size: 0.88rem;
+      background: linear-gradient(180deg, #f4efdf 0%, #ede5d2 100%);
+      font-size: 0.82rem;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.08em;
       color: #566148;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
     tr:last-child td {
       border-bottom: 0;
     }
 
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #fcf9f1;
+    }
+
+    tbody tr:hover td {
+      background: #eef6f0;
+    }
+
     .row-actions {
       display: flex;
       gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .row-actions button {
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
     }
 
     .book-cover {
@@ -263,6 +413,25 @@
       margin: 0;
       color: var(--subtle);
       font-size: 0.84rem;
+    }
+
+    td:nth-child(1) {
+      font-weight: 700;
+      color: #344032;
+      min-width: 140px;
+    }
+
+    td:nth-child(2) {
+      min-width: 68px;
+    }
+
+    td:nth-child(3),
+    td:nth-child(4) {
+      min-width: 96px;
+    }
+
+    td:nth-child(8) {
+      min-width: 120px;
     }
 
     .announcement-item {
@@ -381,6 +550,30 @@
       color: var(--subtle);
     }
 
+    .chart-sub {
+      background: #f6f8f4;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .chart-sub h3 {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--subtle);
+      font-weight: 700;
+    }
+
+    .chart-sub canvas {
+      display: block;
+      width: 100% !important;
+      height: 220px !important;
+      max-height: 190px;
+    }
+
     @keyframes reveal {
       from {
         opacity: 0;
@@ -396,6 +589,17 @@
       .wrap {
         grid-template-columns: 1fr;
       }
+
+      th,
+      td {
+        padding: 9px 8px;
+        font-size: 0.86rem;
+      }
+
+      .row-actions button {
+        padding: 5px 8px;
+        font-size: 0.76rem;
+      }
     }
   </style>
 </head>
@@ -403,133 +607,51 @@
   <main class="wrap">
     <section class="panel">
       <h1>图书管理中心</h1>
-      <p class="subtitle">录入、编辑、删除图书信息。数据保存到数据库。</p>
-      <div class="links">
+      <p class="subtitle">借阅数据可视化总览</p>
+      <div class="utility-links">
         <a id="link-login" href="/login.html">用户登录</a>
         <a href="/tianxia.html">天下图书</a>
         <a id="link-register" href="/register.html">用户注册</a>
-        <a href="/admin/borrows.html">借阅总览</a>
-        <a href="/admin/announcements.html">进入公告后台</a>
         <span id="auth-inline" class="auth-inline" hidden>
           <span id="auth-user" class="auth-user"></span>
           <button id="logout-btn" class="auth-logout" type="button">登出</button>
         </span>
       </div>
 
-      <form id="book-form" class="book-form">
-        <div>
-          <label for="book-title">书名</label>
-          <input id="book-title" maxlength="120" required />
-        </div>
-        <div>
-          <label for="book-author">作者</label>
-          <input id="book-author" maxlength="80" required />
-        </div>
-        <div>
-          <label for="book-category">分类</label>
-          <input id="book-category" maxlength="50" placeholder="如：计算机 / 文学 / 历史" required />
-        </div>
-        <div>
-          <label for="book-stock">库存数</label>
-          <input id="book-stock" type="number" min="0" max="999999" step="1" required />
-        </div>
-        <div>
-          <label for="book-recommendation-index">推荐指数</label>
-          <input id="book-recommendation-index" type="number" min="1" max="5" step="1" required />
-        </div>
-        <div>
-          <label for="book-image-file">图片上传</label>
-          <div class="upload-box">
-            <input id="book-image-file" type="file" accept="image/*" />
-            <img id="book-image-preview" class="upload-preview" alt="封面预览" />
-            <p class="upload-tip">支持本地上传，保存前会自动压缩图片，减少数据库存储长度。</p>
-          </div>
-        </div>
-        <div>
-          <label for="book-state">状态</label>
-          <select id="book-state">
-            <option value="NORMAL">普通</option>
-            <option value="RECOMMENDED">推荐</option>
-          </select>
-        </div>
-      </form>
-
-      <div class="actions">
-        <button id="save-book" type="button">新增图书</button>
-        <button id="cancel-edit" class="secondary" type="button" hidden>取消编辑</button>
-        <p id="book-status" class="status"></p>
+      <div class="chart-sub">
+        <h3>热门图书排行</h3>
+        <canvas id="chartBooks"></canvas>
       </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>书名</th>
-            <th>图片</th>
-            <th>作者</th>
-            <th>分类</th>
-            <th>库存数</th>
-            <th>可出借</th>
-            <th>推荐指数</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="book-list"></tbody>
-      </table>
+      <div class="chart-sub">
+        <h3>借阅状态分布</h3>
+        <canvas id="chartStatus"></canvas>
+      </div>
     </section>
 
     <section class="panel">
-      <h2>表单操作演示</h2>
-      <p class="subtitle">这是一个简单的表单示例。详细功能请访问<a href="/tianxia.html" style="color: var(--accent);">天下图书</a>页面。</p>
+      <h2>快捷导航</h2>
+      <p class="subtitle">后台管理功能入口 &middot; 前台访问入口</p>
+
+      <nav class="admin-nav" aria-label="快捷导航">
+        <span class="nav-group-label">后台管理</span>
+        <a class="active" href="/">后台首页</a>
+        <a href="/admin/books.html">图书编辑</a>
+        <a href="/admin/book-upload.html">图书上传</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a href="/admin/reviews.html">评论总览</a>
+        <div class="nav-divider"></div>
+        <span class="nav-group-label">前台入口</span>
+        <a href="/tianxia.html">天下图书</a>
+      </nav>
     </section>
   </main>
 
   <script>
     const STORAGE_KEY = 'demo5_current_user';
-    const bookForm = document.getElementById('book-form');
-    const titleInput = document.getElementById('book-title');
-    const authorInput = document.getElementById('book-author');
-    const categoryInput = document.getElementById('book-category');
-    const stockInput = document.getElementById('book-stock');
-    const recommendationIndexInput = document.getElementById('book-recommendation-index');
-    const imageFileInput = document.getElementById('book-image-file');
-    const imagePreview = document.getElementById('book-image-preview');
-    const stateInput = document.getElementById('book-state');
-    const saveBookBtn = document.getElementById('save-book');
-    const cancelEditBtn = document.getElementById('cancel-edit');
-    const bookStatusEl = document.getElementById('book-status');
-    const bookListEl = document.getElementById('book-list');
     const authInlineEl = document.getElementById('auth-inline');
     const authUserEl = document.getElementById('auth-user');
     const logoutBtn = document.getElementById('logout-btn');
-
-    let books = [];
-    let editingBookId = null;
-    let currentImage = '';
-
-    function escapeHtml(text) {
-      return String(text || '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function formatTime(value) {
-      if (!value) {
-        return '-';
-      }
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) {
-        return value;
-      }
-      return date.toLocaleString();
-    }
-
-    function setBookStatus(message, isError) {
-      bookStatusEl.textContent = message || '';
-      bookStatusEl.className = isError ? 'status error' : 'status';
-    }
 
     function syncAuthUi() {
       const username = localStorage.getItem(STORAGE_KEY) || '';
@@ -545,299 +667,6 @@
       authUserEl.textContent = `当前用户：${username}`;
     }
 
-    function resetBookForm() {
-      editingBookId = null;
-      saveBookBtn.textContent = '新增图书';
-      cancelEditBtn.hidden = true;
-      bookForm.reset();
-      currentImage = '';
-      imageFileInput.value = '';
-      imagePreview.style.display = 'none';
-      imagePreview.removeAttribute('src');
-      stateInput.value = 'NORMAL';
-    }
-
-    function updateImagePreview(image) {
-      currentImage = image || '';
-      if (!currentImage) {
-        imagePreview.style.display = 'none';
-        imagePreview.removeAttribute('src');
-        return;
-      }
-      imagePreview.src = currentImage;
-      imagePreview.style.display = 'block';
-    }
-
-    function loadImage(dataUrl) {
-      return new Promise((resolve, reject) => {
-        const image = new Image();
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error('图片解析失败'));
-        image.src = dataUrl;
-      });
-    }
-
-    function readAsDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
-        reader.onerror = () => reject(new Error('图片读取失败'));
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function compressImage(file) {
-      const rawDataUrl = await readAsDataUrl(file);
-      const image = await loadImage(rawDataUrl);
-
-      const maxSide = 420;
-      const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
-      const width = Math.max(1, Math.round(image.width * ratio));
-      const height = Math.max(1, Math.round(image.height * ratio));
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        return rawDataUrl;
-      }
-
-      ctx.drawImage(image, 0, 0, width, height);
-      const compressed = canvas.toDataURL('image/jpeg', 0.72);
-      return compressed || rawDataUrl;
-    }
-
-    function formatInt(value) {
-      const numeric = Number(value);
-      if (!Number.isFinite(numeric)) {
-        return '0';
-      }
-      return String(Math.max(0, Math.round(numeric)));
-    }
-
-    function starText(value) {
-      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
-      return `<span class="rating-stars" aria-label="${score}星">${'★'.repeat(score)}${'☆'.repeat(5 - score)}</span>`;
-    }
-
-    function isBorrowable(stock) {
-      return Number(stock) > 0;
-    }
-
-    function borrowStatusHtml(stock) {
-      if (isBorrowable(stock)) {
-        return '<span class="borrow-badge yes">可出借</span>';
-      }
-      return '<span class="borrow-badge no">不可出借</span>';
-    }
-
-    function coverCell(imageUrl, title) {
-      if (!imageUrl) {
-        return '<div class="cover-empty">无图</div>';
-      }
-      return `<img class="book-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
-    }
-
-    function recommendedCover(imageUrl, title) {
-      if (!imageUrl) {
-        return '<div class="recommended-cover-empty">无图</div>';
-      }
-      return `<img class="recommended-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
-    }
-
-    function stateLabel(state) {
-      return state === 'RECOMMENDED' ? '推荐' : '普通';
-    }
-
-    function stateClass(state) {
-      return state === 'RECOMMENDED' ? 'recommended' : '';
-    }
-
-    function renderBooks() {
-      bookListEl.innerHTML = '';
-      if (!books.length) {
-        bookListEl.innerHTML = '<tr><td colspan="8" class="empty">暂无图书，请先新增。</td></tr>';
-        return;
-      }
-
-      books.forEach((book) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${escapeHtml(book.title)}</td>
-          <td>${coverCell(book.image, book.title)}</td>
-          <td>${escapeHtml(book.author)}</td>
-          <td>${escapeHtml(book.category)}</td>
-          <td>${formatInt(book.stock)}</td>
-          <td>${borrowStatusHtml(book.stock)}</td>
-          <td>${starText(book.recommendationIndex)}</td>
-          <td>
-            <div class="row-actions">
-              <button class="secondary" type="button" data-action="edit" data-id="${book.id}">编辑</button>
-              <button class="warn" type="button" data-action="delete" data-id="${book.id}">删除</button>
-            </div>
-          </td>
-        `;
-        bookListEl.appendChild(row);
-      });
-    }
-
-    async function loadBooks() {
-      try {
-        const res = await fetch('/api/books');
-        if (!res.ok) {
-          throw new Error('图书加载失败');
-        }
-        const data = await res.json();
-        books = Array.isArray(data) ? data : [];
-        renderBooks();
-      } catch (error) {
-        books = [];
-        renderBooks();
-        setBookStatus(error.message || '图书加载失败', true);
-      }
-    }
-
-    async function upsertBook() {
-      const payload = {
-        title: titleInput.value.trim(),
-        author: authorInput.value.trim(),
-        category: categoryInput.value.trim(),
-        stock: Number(stockInput.value),
-        recommendationIndex: Number(recommendationIndexInput.value),
-        image: currentImage,
-        status: stateInput.value === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL'
-      };
-
-      if (!payload.title || !payload.author || !payload.category) {
-        setBookStatus('请完整填写图书信息', true);
-        return;
-      }
-      if (!Number.isFinite(payload.stock) || payload.stock < 0) {
-        setBookStatus('库存数必须是大于等于 0 的整数', true);
-        return;
-      }
-      if (!Number.isFinite(payload.recommendationIndex) || payload.recommendationIndex < 1 || payload.recommendationIndex > 5) {
-        setBookStatus('推荐指数必须是 1-5 的整数', true);
-        return;
-      }
-      payload.stock = Math.round(payload.stock);
-      payload.recommendationIndex = Math.round(payload.recommendationIndex);
-
-      try {
-        const url = editingBookId ? `/api/books/${editingBookId}` : '/api/books';
-        const method = editingBookId ? 'PUT' : 'POST';
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errorBody = await res.json().catch(() => ({}));
-          throw new Error(errorBody.message || (editingBookId ? '更新失败' : '新增失败'));
-        }
-
-        setBookStatus(editingBookId ? '图书已更新' : '图书已新增', false);
-        await loadBooks();
-        resetBookForm();
-      } catch (error) {
-        setBookStatus(error.message || (editingBookId ? '更新失败' : '新增失败'), true);
-      }
-    }
-
-    function editBook(id) {
-      const book = books.find(b => b.id === id);
-      if (!book) {
-        setBookStatus('图书不存在', true);
-        return;
-      }
-      editingBookId = book.id;
-      titleInput.value = book.title;
-      authorInput.value = book.author;
-      categoryInput.value = book.category;
-      stockInput.value = String(Number.isFinite(Number(book.stock)) ? Number(book.stock) : 0);
-      recommendationIndexInput.value = String(Number.isFinite(Number(book.recommendationIndex)) ? Math.min(5, Math.max(1, Math.round(Number(book.recommendationIndex)))) : 1);
-      imageFileInput.value = '';
-      updateImagePreview(book.image || '');
-      stateInput.value = book.status === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL';
-      saveBookBtn.textContent = '保存修改';
-      cancelEditBtn.hidden = false;
-      setBookStatus('正在编辑图书', false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function deleteBook(id) {
-      try {
-        const res = await fetch(`/api/books/${id}`, {
-          method: 'DELETE'
-        });
-        if (!res.ok) {
-          const errorBody = await res.json().catch(() => ({}));
-          throw new Error(errorBody.message || '删除失败');
-        }
-        if (editingBookId === id) {
-          resetBookForm();
-        }
-        setBookStatus('图书已删除', false);
-        await loadBooks();
-      } catch (error) {
-        setBookStatus(error.message || '删除失败', true);
-      }
-    }
-
-    loadBooks();
-    updateImagePreview('');
-
-    saveBookBtn.addEventListener('click', upsertBook);
-
-    imageFileInput.addEventListener('change', async () => {
-      const file = imageFileInput.files && imageFileInput.files[0];
-      if (!file) {
-        return;
-      }
-      if (!file.type.startsWith('image/')) {
-        setBookStatus('请选择图片文件', true);
-        imageFileInput.value = '';
-        return;
-      }
-      try {
-        const compressed = await compressImage(file);
-        updateImagePreview(compressed);
-        setBookStatus('图片已压缩并加载，可保存图书', false);
-      } catch (error) {
-        setBookStatus(error.message || '图片读取失败，请重试', true);
-      }
-    });
-
-    cancelEditBtn.addEventListener('click', () => {
-      resetBookForm();
-      setBookStatus('已取消编辑', false);
-    });
-
-    bookListEl.addEventListener('click', (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
-      const btn = target.closest('button[data-action]');
-      if (!btn) {
-        return;
-      }
-      const id = Number(btn.dataset.id);
-      if (!id) {
-        return;
-      }
-      if (btn.dataset.action === 'edit') {
-        editBook(id);
-      }
-      if (btn.dataset.action === 'delete') {
-        deleteBook(id);
-      }
-    });
-
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem(STORAGE_KEY);
       syncAuthUi();
@@ -845,6 +674,62 @@
     });
 
     syncAuthUi();
+    loadCharts();
+
+    let chartBooks = null;
+    let chartStatus = null;
+
+    async function loadCharts() {
+      try {
+        const res = await fetch('/api/admin/borrows');
+        if (!res.ok) return;
+        const records = await res.json();
+        if (!Array.isArray(records)) return;
+
+        // 热门图书排行
+        const bookCount = {};
+        records.forEach(r => {
+          const t = r.bookTitle || '未知';
+          bookCount[t] = (bookCount[t] || 0) + 1;
+        });
+        const sortedBooks = Object.entries(bookCount).sort((a, b) => b[1] - a[1]).slice(0, 7);
+        if (chartBooks) chartBooks.destroy();
+        chartBooks = new Chart(document.getElementById('chartBooks'), {
+          type: 'bar',
+          data: {
+            labels: sortedBooks.map(e => e[0]),
+            datasets: [{ label: '借阅次数', data: sortedBooks.map(e => e[1]),
+              backgroundColor: '#2f6d4f', borderRadius: 5, borderSkipped: false }]
+          },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#e5ede8' } },
+              y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+            }
+          }
+        });
+
+        // 借阅状态分布
+        const sc = { BORROWED: 0, RETURNED: 0, OVERDUE: 0 };
+        records.forEach(r => { if (sc[r.status] !== undefined) sc[r.status]++; });
+        if (chartStatus) chartStatus.destroy();
+        chartStatus = new Chart(document.getElementById('chartStatus'), {
+          type: 'doughnut',
+          data: {
+            labels: ['借阅中', '已归还', '逾期'],
+            datasets: [{ data: [sc.BORROWED, sc.RETURNED, sc.OVERDUE],
+              backgroundColor: ['#2f6d4f', '#8aaa98', '#bb3f3f'],
+              borderWidth: 2, borderColor: '#fffdf8' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '58%',
+            plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } }
+          }
+        });
+      } catch (e) { /* 加载失败不影响主页面 */ }
+    }
   </script>
 </body>
 </html>

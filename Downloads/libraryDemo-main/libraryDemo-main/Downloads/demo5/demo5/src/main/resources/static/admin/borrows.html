@@ -47,6 +47,36 @@
       font-size: 1.5rem;
     }
 
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .admin-nav a {
+      color: #2f4b7a;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 7px 14px;
+      border: 1px solid #cdd9ef;
+      border-radius: 999px;
+      background: #f1f6ff;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .admin-nav a:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: #e9f1ff;
+    }
+
+    .admin-nav a.active {
+      color: #fff;
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
     .top-links {
       display: flex;
       gap: 12px;
@@ -196,9 +226,16 @@
   <div class="container">
     <section class="card">
       <h1>后台管理 - 借阅总览</h1>
+      <nav class="admin-nav" aria-label="后台管理导航">
+          <a href="/">后台首页</a>
+        <a href="/admin/books.html">图书编辑</a>
+        <a href="/admin/book-upload.html">图书上传</a>
+        <a class="active" href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a href="/admin/reviews.html">评论总览</a>
+      </nav>
       <div class="top-links">
         <a href="/">返回首页</a>
-        <a href="/admin/announcements.html">公告后台</a>
         <a href="/profile.html">我的借阅页</a>
       </div>
       <div class="toolbar">

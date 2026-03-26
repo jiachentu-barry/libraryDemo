@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 图书编辑</title>
+  <style>
+    :root {
+      --bg-1: #f6f2e7;
+      --bg-2: #e8f1e5;
+      --paper: #fffdf8;
+      --ink: #2a2f24;
+      --subtle: #6d7461;
+      --line: #d8d2c0;
+      --accent: #2f6d4f;
+      --accent-2: #1f5039;
+      --warn: #9d5b2c;
+      --danger: #bb3f3f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 12% 8%, #f1e2c8 0 20%, transparent 21%),
+        radial-gradient(circle at 88% 14%, #cfe4d5 0 24%, transparent 25%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1100px, 94vw);
+      margin: 30px auto;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--paper) 90%, white 10%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(42, 47, 36, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--subtle);
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .admin-nav a {
+      color: #415041;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 14px;
+      border: 1px solid #d3ddce;
+      border-radius: 999px;
+      background: #f3f8f0;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .admin-nav a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #ecf5ef;
+    }
+
+    .admin-nav a.active {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .button-link,
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-link:hover,
+    button:hover {
+      background: var(--accent-2);
+    }
+
+    button.secondary {
+      background: #7d8674;
+    }
+
+    button.secondary:hover {
+      background: #656d5c;
+    }
+
+    button.warn {
+      background: var(--warn);
+    }
+
+    button.warn:hover {
+      background: #834b22;
+    }
+
+    .status {
+      margin: 0;
+      font-weight: 700;
+      color: var(--subtle);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fffefb 0%, #f8f4ea 100%);
+      padding: 8px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      overflow-x: auto;
+    }
+
+    .table-pagination {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: #fff;
+      color: var(--subtle);
+      cursor: pointer;
+      transition: border-color 180ms, background 180ms, color 180ms;
+    }
+
+    .page-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #eef6f0;
+    }
+
+    .page-btn.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .page-btn:disabled {
+      border-color: var(--line);
+      background: #f5f5f5;
+      color: #a8ada2;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.92rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: linear-gradient(180deg, #f4efdf 0%, #ede5d2 100%);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #566148;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #fcf9f1;
+    }
+
+    tbody tr:hover td {
+      background: #eef6f0;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .row-actions button {
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .book-cover {
+      width: 52px;
+      height: 68px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      display: block;
+      background: #f2efe7;
+    }
+
+    .cover-empty {
+      width: 52px;
+      height: 68px;
+      border-radius: 6px;
+      border: 1px dashed var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.8rem;
+      background: #f8f4e9;
+    }
+
+    .rating-stars {
+      color: #e0a800;
+      letter-spacing: 1px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .borrow-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .borrow-badge.yes {
+      color: #1f6d3a;
+      background: #e8f7ec;
+      border-color: #b8e2c4;
+    }
+
+    .borrow-badge.no {
+      color: #8a3b3b;
+      background: #fdeeee;
+      border-color: #f4c5c5;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--subtle);
+    }
+
+    td:nth-child(1) {
+      font-weight: 700;
+      color: #344032;
+      min-width: 140px;
+    }
+
+    td:nth-child(2) {
+      min-width: 68px;
+    }
+
+    td:nth-child(3),
+    td:nth-child(4) {
+      min-width: 96px;
+    }
+
+    td:nth-child(8) {
+      min-width: 120px;
+    }
+
+    @media (max-width: 900px) {
+      th,
+      td {
+        padding: 9px 8px;
+        font-size: 0.86rem;
+      }
+
+      .row-actions button {
+        padding: 5px 8px;
+        font-size: 0.76rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="panel">
+      <h1>图书编辑</h1>
+      <p class="subtitle">查看、分页管理、删除图书，也可进入上传页修改图书信息。</p>
+
+      <nav class="admin-nav" aria-label="后台管理导航">
+        <a href="/">后台首页</a>
+        <a class="active" href="/admin/books.html">图书编辑</a>
+        <a href="/admin/book-upload.html">图书上传</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a href="/admin/reviews.html">评论总览</a>
+      </nav>
+
+      <div class="actions">
+        <a class="button-link" href="/admin/book-upload.html">新增图书</a>
+        <p id="book-status" class="status"></p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>书名</th>
+              <th>图片</th>
+              <th>作者</th>
+              <th>分类</th>
+              <th>库存数</th>
+              <th>可出借</th>
+              <th>推荐指数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="book-list"></tbody>
+        </table>
+        <div id="book-pagination" class="table-pagination" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const bookStatusEl = document.getElementById('book-status');
+    const bookListEl = document.getElementById('book-list');
+    const bookPaginationEl = document.getElementById('book-pagination');
+
+    const BOOKS_PER_PAGE = 4;
+    let books = [];
+    let currentBookPage = 1;
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function setBookStatus(message, isError) {
+      bookStatusEl.textContent = message || '';
+      bookStatusEl.className = isError ? 'status error' : 'status';
+    }
+
+    function formatInt(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        return '0';
+      }
+      return String(Math.max(0, Math.round(numeric)));
+    }
+
+    function starText(value) {
+      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
+      return `<span class="rating-stars" aria-label="${score}星">${'★'.repeat(score)}${'☆'.repeat(5 - score)}</span>`;
+    }
+
+    function isBorrowable(stock) {
+      return Number(stock) > 0;
+    }
+
+    function borrowStatusHtml(stock) {
+      if (isBorrowable(stock)) {
+        return '<span class="borrow-badge yes">可出借</span>';
+      }
+      return '<span class="borrow-badge no">不可出借</span>';
+    }
+
+    function coverCell(imageUrl, title) {
+      if (!imageUrl) {
+        return '<div class="cover-empty">无图</div>';
+      }
+      return `<img class="book-cover" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`;
+    }
+
+    function renderBookPagination(totalPages) {
+      if (totalPages <= 1) {
+        bookPaginationEl.hidden = true;
+        bookPaginationEl.innerHTML = '';
+        return;
+      }
+
+      const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
+        .map((page) => `<button class="page-btn${page === currentBookPage ? ' active' : ''}" type="button" data-page="${page}">${page}</button>`)
+        .join('');
+
+      bookPaginationEl.hidden = false;
+      bookPaginationEl.innerHTML = `
+        <button class="page-btn" type="button" data-action="prev" ${currentBookPage === 1 ? 'disabled' : ''}>上一页</button>
+        ${pages}
+        <button class="page-btn" type="button" data-action="next" ${currentBookPage === totalPages ? 'disabled' : ''}>下一页</button>
+      `;
+    }
+
+    function renderBooks() {
+      bookListEl.innerHTML = '';
+      if (!books.length) {
+        bookListEl.innerHTML = '<tr><td colspan="8" class="empty">暂无图书，请先新增。</td></tr>';
+        bookPaginationEl.hidden = true;
+        bookPaginationEl.innerHTML = '';
+        return;
+      }
+
+      const totalPages = Math.max(1, Math.ceil(books.length / BOOKS_PER_PAGE));
+      if (currentBookPage > totalPages) {
+        currentBookPage = totalPages;
+      }
+      if (currentBookPage < 1) {
+        currentBookPage = 1;
+      }
+
+      const startIndex = (currentBookPage - 1) * BOOKS_PER_PAGE;
+      const pageBooks = books.slice(startIndex, startIndex + BOOKS_PER_PAGE);
+
+      pageBooks.forEach((book) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${escapeHtml(book.title)}</td>
+          <td>${coverCell(book.image, book.title)}</td>
+          <td>${escapeHtml(book.author)}</td>
+          <td>${escapeHtml(book.category)}</td>
+          <td>${formatInt(book.stock)}</td>
+          <td>${borrowStatusHtml(book.stock)}</td>
+          <td>${starText(book.recommendationIndex)}</td>
+          <td>
+            <div class="row-actions">
+              <button class="secondary" type="button" data-action="edit" data-id="${book.id}">编辑</button>
+              <button class="warn" type="button" data-action="delete" data-id="${book.id}">删除</button>
+            </div>
+          </td>
+        `;
+        bookListEl.appendChild(row);
+      });
+
+      renderBookPagination(totalPages);
+    }
+
+    async function loadBooks() {
+      try {
+        const res = await fetch('/api/books');
+        if (!res.ok) {
+          throw new Error('图书加载失败');
+        }
+        const data = await res.json();
+        books = Array.isArray(data) ? data : [];
+        renderBooks();
+        setBookStatus(`共 ${books.length} 本图书`, false);
+      } catch (error) {
+        books = [];
+        renderBooks();
+        setBookStatus(error.message || '图书加载失败', true);
+      }
+    }
+
+    async function deleteBook(id) {
+      try {
+        const res = await fetch(`/api/books/${id}`, {
+          method: 'DELETE'
+        });
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody.message || '删除失败');
+        }
+        setBookStatus('图书已删除', false);
+        await loadBooks();
+      } catch (error) {
+        setBookStatus(error.message || '删除失败', true);
+      }
+    }
+
+    bookListEl.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const btn = target.closest('button[data-action]');
+      if (!btn) {
+        return;
+      }
+
+      const id = Number(btn.dataset.id);
+      if (!id) {
+        return;
+      }
+
+      if (btn.dataset.action === 'edit') {
+        window.location.href = `/admin/book-upload.html?id=${id}`;
+      }
+      if (btn.dataset.action === 'delete') {
+        deleteBook(id);
+      }
+    });
+
+    bookPaginationEl.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const btn = target.closest('button');
+      if (!btn || btn.disabled) {
+        return;
+      }
+
+      const totalPages = Math.max(1, Math.ceil(books.length / BOOKS_PER_PAGE));
+      if (btn.dataset.action === 'prev') {
+        currentBookPage = Math.max(1, currentBookPage - 1);
+      } else if (btn.dataset.action === 'next') {
+        currentBookPage = Math.min(totalPages, currentBookPage + 1);
+      } else if (btn.dataset.page) {
+        const page = Number(btn.dataset.page);
+        if (Number.isFinite(page) && page >= 1 && page <= totalPages) {
+          currentBookPage = page;
+        }
+      }
+
+      renderBooks();
+    });
+
+    loadBooks();
+  </script>
+</body>
+</html>

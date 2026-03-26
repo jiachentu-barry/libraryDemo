@@ -1,0 +1,3 @@
+id,userId,username,bookId,bookTitle,borrowedAt,dueDate,returnedAt,status
+7,3,tujiachen,7,三国演义,2026-03-25 15:44:06,2026-04-08 15:44:06,,BORROWED
+8,3,tujiachen,8,红楼梦,2026-03-25 15:44:09,2026-04-08 15:44:09,,BORROWED

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 图书上传</title>
+  <style>
+    :root {
+      --bg-1: #f6f2e7;
+      --bg-2: #e8f1e5;
+      --paper: #fffdf8;
+      --ink: #2a2f24;
+      --subtle: #6d7461;
+      --line: #d8d2c0;
+      --accent: #2f6d4f;
+      --accent-2: #1f5039;
+      --danger: #bb3f3f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 12% 8%, #f1e2c8 0 20%, transparent 21%),
+        radial-gradient(circle at 88% 14%, #cfe4d5 0 24%, transparent 25%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(980px, 94vw);
+      margin: 30px auto;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--paper) 90%, white 10%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(42, 47, 36, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--subtle);
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .admin-nav a {
+      color: #415041;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 14px;
+      border: 1px solid #d3ddce;
+      border-radius: 999px;
+      background: #f3f8f0;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .admin-nav a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #ecf5ef;
+    }
+
+    .admin-nav a.active {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .book-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .upload-box {
+      display: grid;
+      gap: 8px;
+    }
+
+    .upload-preview {
+      width: 96px;
+      height: 128px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      object-fit: cover;
+      background: #f4efe3;
+      display: none;
+    }
+
+    .upload-tip {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 0.84rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-2);
+    }
+
+    button.secondary {
+      background: #7d8674;
+    }
+
+    button.secondary:hover {
+      background: #656d5c;
+    }
+
+    .status {
+      margin: 0;
+      font-weight: 700;
+      color: var(--subtle);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    @media (max-width: 900px) {
+      .book-form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="panel">
+      <h1>图书上传与编辑</h1>
+      <p class="subtitle">在此新增图书，或从图书列表页进入编辑模式。</p>
+
+      <nav class="admin-nav" aria-label="后台管理导航">
+        <a href="/">后台首页</a>
+        <a href="/admin/books.html">图书编辑</a>
+        <a class="active" href="/admin/book-upload.html">图书上传</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a href="/admin/reviews.html">评论总览</a>
+      </nav>
+
+      <form id="book-form" class="book-form">
+        <div>
+          <label for="book-title">书名</label>
+          <input id="book-title" maxlength="120" required />
+        </div>
+        <div>
+          <label for="book-author">作者</label>
+          <input id="book-author" maxlength="80" required />
+        </div>
+        <div>
+          <label for="book-category">分类</label>
+          <input id="book-category" maxlength="50" placeholder="如：计算机 / 文学 / 历史" required />
+        </div>
+        <div>
+          <label for="book-stock">库存数</label>
+          <input id="book-stock" type="number" min="0" max="999999" step="1" required />
+        </div>
+        <div>
+          <label for="book-recommendation-index">推荐指数</label>
+          <input id="book-recommendation-index" type="number" min="1" max="5" step="1" required />
+        </div>
+        <div>
+          <label for="book-image-file">图片上传</label>
+          <div class="upload-box">
+            <input id="book-image-file" type="file" accept="image/*" />
+            <img id="book-image-preview" class="upload-preview" alt="封面预览" />
+            <p class="upload-tip">支持本地上传，保存前会自动压缩图片，减少数据库存储长度。</p>
+          </div>
+        </div>
+        <div>
+          <label for="book-state">状态</label>
+          <select id="book-state">
+            <option value="NORMAL">普通</option>
+            <option value="RECOMMENDED">推荐</option>
+          </select>
+        </div>
+      </form>
+
+      <div class="actions">
+        <button id="save-book" type="button">新增图书</button>
+        <button id="back-list" class="secondary" type="button">返回图书列表</button>
+        <p id="book-status" class="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('book-form');
+    const titleInput = document.getElementById('book-title');
+    const authorInput = document.getElementById('book-author');
+    const categoryInput = document.getElementById('book-category');
+    const stockInput = document.getElementById('book-stock');
+    const recommendationIndexInput = document.getElementById('book-recommendation-index');
+    const imageFileInput = document.getElementById('book-image-file');
+    const imagePreview = document.getElementById('book-image-preview');
+    const stateInput = document.getElementById('book-state');
+    const saveBookBtn = document.getElementById('save-book');
+    const backListBtn = document.getElementById('back-list');
+    const statusEl = document.getElementById('book-status');
+
+    const idParam = new URLSearchParams(window.location.search).get('id');
+    const editingBookId = Number(idParam);
+
+    let currentImage = '';
+
+    function setStatus(message, isError) {
+      statusEl.textContent = message || '';
+      statusEl.className = isError ? 'status error' : 'status';
+    }
+
+    function updateImagePreview(image) {
+      currentImage = image || '';
+      if (!currentImage) {
+        imagePreview.style.display = 'none';
+        imagePreview.removeAttribute('src');
+        return;
+      }
+      imagePreview.src = currentImage;
+      imagePreview.style.display = 'block';
+    }
+
+    function loadImage(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('图片解析失败'));
+        image.src = dataUrl;
+      });
+    }
+
+    function readAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+        reader.onerror = () => reject(new Error('图片读取失败'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function compressImage(file) {
+      const rawDataUrl = await readAsDataUrl(file);
+      const image = await loadImage(rawDataUrl);
+
+      const maxSide = 420;
+      const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * ratio));
+      const height = Math.max(1, Math.round(image.height * ratio));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return rawDataUrl;
+      }
+
+      ctx.drawImage(image, 0, 0, width, height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.72);
+      return compressed || rawDataUrl;
+    }
+
+    async function loadBookForEdit() {
+      if (!Number.isFinite(editingBookId) || editingBookId <= 0) {
+        return;
+      }
+      try {
+        const res = await fetch(`/api/books/${editingBookId}`);
+        if (!res.ok) {
+          throw new Error('图书不存在');
+        }
+        const book = await res.json();
+        titleInput.value = book.title || '';
+        authorInput.value = book.author || '';
+        categoryInput.value = book.category || '';
+        stockInput.value = String(Number.isFinite(Number(book.stock)) ? Number(book.stock) : 0);
+        recommendationIndexInput.value = String(Number.isFinite(Number(book.recommendationIndex)) ? Math.min(5, Math.max(1, Math.round(Number(book.recommendationIndex)))) : 1);
+        stateInput.value = book.status === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL';
+        updateImagePreview(book.image || '');
+        saveBookBtn.textContent = '保存修改';
+        setStatus('已进入编辑模式', false);
+      } catch (error) {
+        setStatus(error.message || '加载图书失败', true);
+      }
+    }
+
+    async function upsertBook() {
+      const payload = {
+        title: titleInput.value.trim(),
+        author: authorInput.value.trim(),
+        category: categoryInput.value.trim(),
+        stock: Number(stockInput.value),
+        recommendationIndex: Number(recommendationIndexInput.value),
+        image: currentImage,
+        status: stateInput.value === 'RECOMMENDED' ? 'RECOMMENDED' : 'NORMAL'
+      };
+
+      if (!payload.title || !payload.author || !payload.category) {
+        setStatus('请完整填写图书信息', true);
+        return;
+      }
+      if (!Number.isFinite(payload.stock) || payload.stock < 0) {
+        setStatus('库存数必须是大于等于 0 的整数', true);
+        return;
+      }
+      if (!Number.isFinite(payload.recommendationIndex) || payload.recommendationIndex < 1 || payload.recommendationIndex > 5) {
+        setStatus('推荐指数必须是 1-5 的整数', true);
+        return;
+      }
+
+      payload.stock = Math.round(payload.stock);
+      payload.recommendationIndex = Math.round(payload.recommendationIndex);
+
+      try {
+        const isEdit = Number.isFinite(editingBookId) && editingBookId > 0;
+        const url = isEdit ? `/api/books/${editingBookId}` : '/api/books';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody.message || (isEdit ? '更新失败' : '新增失败'));
+        }
+
+        if (isEdit) {
+          setStatus('图书已更新，正在返回列表…', false);
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 800);
+          return;
+        }
+
+        form.reset();
+        imageFileInput.value = '';
+        updateImagePreview('');
+        stateInput.value = 'NORMAL';
+        setStatus('图书已新增，可继续上传', false);
+      } catch (error) {
+        setStatus(error.message || '保存失败', true);
+      }
+    }
+
+    saveBookBtn.addEventListener('click', upsertBook);
+
+    imageFileInput.addEventListener('change', async () => {
+      const file = imageFileInput.files && imageFileInput.files[0];
+      if (!file) {
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setStatus('请选择图片文件', true);
+        imageFileInput.value = '';
+        return;
+      }
+      try {
+        const compressed = await compressImage(file);
+        updateImagePreview(compressed);
+        setStatus('图片已压缩并加载，可保存图书', false);
+      } catch (error) {
+        setStatus(error.message || '图片读取失败，请重试', true);
+      }
+    });
+
+    backListBtn.addEventListener('click', () => {
+      window.location.href = '/admin/books.html';
+    });
+
+    loadBookForEdit();
+  </script>
+</body>
+</html>

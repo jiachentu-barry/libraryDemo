@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 评论总览</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --text: #1f2a44;
+      --muted: #6f7b94;
+      --line: #dbe2f0;
+      --primary: #1a73e8;
+      --primary-dark: #155dc0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(140deg, #eff4ff, var(--bg));
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1120px, 94vw);
+      margin: 36px auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.5rem;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .admin-nav a {
+      color: #2f4b7a;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 7px 14px;
+      border: 1px solid #cdd9ef;
+      border-radius: 999px;
+      background: #f1f6ff;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .admin-nav a:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: #e9f1ff;
+    }
+
+    .admin-nav a.active {
+      color: #fff;
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .toolbar input,
+    .toolbar button {
+      font: inherit;
+      border-radius: 10px;
+    }
+
+    .toolbar input {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+      min-width: 280px;
+    }
+
+    .toolbar button {
+      border: 0;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+    }
+
+    .toolbar button:hover {
+      background: var(--primary-dark);
+    }
+
+    .stat {
+      margin: 0;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.92rem;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .rating-stars {
+      color: #e0a800;
+      letter-spacing: 1px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .empty {
+      color: var(--muted);
+      margin: 8px 0 0;
+    }
+
+    @media (max-width: 900px) {
+      .responsive-wrap { overflow-x: auto; }
+      table { min-width: 900px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <h1>后台管理 - 评论总览</h1>
+      <nav class="admin-nav" aria-label="后台管理导航">
+          <a href="/">后台首页</a>
+        <a href="/admin/books.html">图书编辑</a>
+        <a href="/admin/book-upload.html">图书上传</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a class="active" href="/admin/reviews.html">评论总览</a>
+      </nav>
+
+      <div class="toolbar">
+        <input id="keyword" type="search" placeholder="搜索图书名、用户名、评论内容" />
+        <button id="refreshBtn" type="button">刷新</button>
+        <p id="stat" class="stat">评论总数：0</p>
+      </div>
+
+      <div class="responsive-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>图书</th>
+              <th>用户</th>
+              <th>评分</th>
+              <th>评论</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody id="reviewList"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty" hidden>暂无评论</p>
+    </section>
+  </div>
+
+  <script>
+    const keywordEl = document.getElementById('keyword');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statEl = document.getElementById('stat');
+    const reviewListEl = document.getElementById('reviewList');
+    const emptyEl = document.getElementById('empty');
+
+    let reviews = [];
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString();
+    }
+
+    function starText(value) {
+      const score = Math.min(5, Math.max(1, Math.round(Number(value) || 1)));
+      return `<span class="rating-stars">${'★'.repeat(score)}${'☆'.repeat(5 - score)}</span>`;
+    }
+
+    function getFilteredReviews() {
+      const keyword = String(keywordEl.value || '').trim().toLowerCase();
+      if (!keyword) {
+        return reviews;
+      }
+      return reviews.filter((item) => {
+        const book = String(item.bookTitle || '').toLowerCase();
+        const user = String(item.username || '').toLowerCase();
+        const comment = String(item.comment || '').toLowerCase();
+        return book.includes(keyword) || user.includes(keyword) || comment.includes(keyword);
+      });
+    }
+
+    function renderReviews() {
+      const list = getFilteredReviews();
+      statEl.textContent = `评论总数：${reviews.length}`;
+      reviewListEl.innerHTML = '';
+
+      if (!list.length) {
+        emptyEl.hidden = false;
+        return;
+      }
+
+      emptyEl.hidden = true;
+      list.forEach((item) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${Number(item.id) || '-'}</td>
+          <td>${escapeHtml(item.bookTitle)}</td>
+          <td>${escapeHtml(item.username)}</td>
+          <td>${starText(item.rating)}</td>
+          <td>${escapeHtml(item.comment || '（未填写文字评价）')}</td>
+          <td>${escapeHtml(formatTime(item.createdAt))}</td>
+        `;
+        reviewListEl.appendChild(row);
+      });
+    }
+
+    async function loadReviews() {
+      try {
+        const res = await fetch('/api/reviews');
+        if (!res.ok) {
+          throw new Error('评论加载失败');
+        }
+        const data = await res.json();
+        reviews = Array.isArray(data) ? data : [];
+        renderReviews();
+      } catch (error) {
+        reviews = [];
+        renderReviews();
+      }
+    }
+
+    keywordEl.addEventListener('input', renderReviews);
+    refreshBtn.addEventListener('click', loadReviews);
+
+    loadReviews();
+  </script>
+</body>
+</html>
