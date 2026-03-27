@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.demo5.entity.AppUser;
 import com.example.demo5.entity.Book;
 import com.example.demo5.enums.BookStatus;
+import com.example.demo5.enums.UserRole;
+import com.example.demo5.repository.AppUserRepository;
 import com.example.demo5.repository.BookRepository;
 
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
     private final BookRepository bookRepository;
+    private final AppUserRepository appUserRepository;
 
-    public BookController(BookRepository bookRepository) {
+    public BookController(BookRepository bookRepository, AppUserRepository appUserRepository) {
         this.bookRepository = bookRepository;
+        this.appUserRepository = appUserRepository;
     }
 
     @GetMapping("/books")
@@ -53,7 +59,12 @@ public class BookController {
     }
 
     @PostMapping("/books")
-    public ResponseEntity<?> createBook(@RequestBody BookRequest request) {
+    public ResponseEntity<?> createBook(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                        @RequestBody BookRequest request) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         String title = trim(request.title());
         String author = trim(request.author());
         String category = trim(request.category());
@@ -82,7 +93,13 @@ public class BookController {
     }
 
     @PutMapping("/books/{id}")
-    public ResponseEntity<?> updateBook(@PathVariable Long id, @RequestBody BookRequest request) {
+    public ResponseEntity<?> updateBook(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                        @PathVariable Long id,
+                                        @RequestBody BookRequest request) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         Book book = bookRepository.findById(id).orElse(null);
         if (book == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiMessage("图书不存在"));
@@ -114,7 +131,12 @@ public class BookController {
     }
 
     @DeleteMapping("/books/{id}")
-    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBook(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                        @PathVariable Long id) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         if (!bookRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiMessage("图书不存在"));
         }
@@ -157,6 +179,21 @@ public class BookController {
         } catch (IllegalArgumentException ex) {
             return null;
         }
+    }
+
+    private ResponseEntity<ApiMessage> requireAdmin(String authUsername) {
+        String username = trim(authUsername);
+        if (username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("请先登录管理员账号"));
+        }
+        AppUser user = appUserRepository.findByUsernameIgnoreCase(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("用户不存在"));
+        }
+        if (user.getRole() != UserRole.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiMessage("仅管理员可访问后台管理"));
+        }
+        return null;
     }
 
     public record BookRequest(String title, String author, String category, Integer stock, Integer recommendationIndex, String image, String status) {

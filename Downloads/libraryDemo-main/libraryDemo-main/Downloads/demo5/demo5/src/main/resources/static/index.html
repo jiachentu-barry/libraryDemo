@@ -607,7 +607,7 @@
   <main class="wrap">
     <section class="panel">
       <h1>图书管理中心</h1>
-      <p class="subtitle">借阅数据可视化总览</p>
+      <p class="subtitle" data-admin-only>借阅数据可视化总览</p>
       <div class="utility-links">
         <a id="link-login" href="/login.html">用户登录</a>
         <a href="/tianxia.html">天下图书</a>
@@ -618,11 +618,11 @@
         </span>
       </div>
 
-      <div class="chart-sub">
+      <div class="chart-sub" data-admin-only>
         <h3>热门图书排行</h3>
         <canvas id="chartBooks"></canvas>
       </div>
-      <div class="chart-sub">
+      <div class="chart-sub" data-admin-only>
         <h3>借阅状态分布</h3>
         <canvas id="chartStatus"></canvas>
       </div>
@@ -633,42 +633,49 @@
       <p class="subtitle">后台管理功能入口 &middot; 前台访问入口</p>
 
       <nav class="admin-nav" aria-label="快捷导航">
-        <span class="nav-group-label">后台管理</span>
-        <a class="active" href="/">后台首页</a>
-        <a href="/admin/books.html">图书编辑</a>
-        <a href="/admin/book-upload.html">图书上传</a>
-        <a href="/admin/borrows.html">借阅总览</a>
-        <a href="/admin/announcements.html">公告管理</a>
-        <a href="/admin/reviews.html">评论总览</a>
-        <div class="nav-divider"></div>
+        <span class="nav-group-label" data-admin-only>后台管理</span>
+        <a class="active" href="/index.html" data-admin-only>后台首页</a>
+        <a href="/admin/books.html" data-admin-only>图书编辑</a>
+        <a href="/admin/book-upload.html" data-admin-only>图书上传</a>
+        <a href="/admin/borrows.html" data-admin-only>借阅总览</a>
+        <a href="/admin/announcements.html" data-admin-only>公告管理</a>
+        <a href="/admin/reviews.html" data-admin-only>评论总览</a>
+        <a href="/admin/users.html" data-admin-only>管理员管理</a>
+        <div class="nav-divider" data-admin-only></div>
         <span class="nav-group-label">前台入口</span>
         <a href="/tianxia.html">天下图书</a>
       </nav>
     </section>
   </main>
 
+  <script src="/js/auth.js"></script>
   <script>
-    const STORAGE_KEY = 'demo5_current_user';
+    const AUTH = window.Demo5Auth;
     const authInlineEl = document.getElementById('auth-inline');
     const authUserEl = document.getElementById('auth-user');
     const logoutBtn = document.getElementById('logout-btn');
+    const adminOnlyEls = document.querySelectorAll('[data-admin-only]');
 
-    function syncAuthUi() {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+    async function syncAuthUi() {
+      const user = await AUTH.loadCurrentUser();
+      const username = user?.username || '';
       const loggedIn = !!username;
       document.getElementById('link-login').hidden = loggedIn;
       document.getElementById('link-register').hidden = loggedIn;
+      adminOnlyEls.forEach((el) => {
+        el.hidden = !AUTH.isAdmin(user);
+      });
       if (!username) {
         authInlineEl.hidden = true;
         authUserEl.textContent = '';
         return;
       }
       authInlineEl.hidden = false;
-      authUserEl.textContent = `当前用户：${username}`;
+      authUserEl.textContent = `当前用户：${username}${AUTH.isAdmin(user) ? '（管理员）' : ''}`;
     }
 
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
+      AUTH.clearUser();
       syncAuthUi();
       window.location.href = '/login.html';
     });
@@ -678,10 +685,40 @@
 
     let chartBooks = null;
     let chartStatus = null;
+    const bookChartGradientPairs = [
+      ['#ff7a59', '#ffb347'],
+      ['#ff5f6d', '#ffc371'],
+      ['#ffd166', '#06d6a0'],
+      ['#00c6ff', '#0072ff'],
+      ['#7f5af0', '#2cb67d'],
+      ['#f857a6', '#ff5858'],
+      ['#43cea2', '#185a9d']
+    ];
+    const statusChartGradientPairs = [
+      ['#4facfe', '#00f2fe'],
+      ['#43e97b', '#38f9d7'],
+      ['#fa709a', '#fee140']
+    ];
+
+    function createLinearGradient(canvas, colors, horizontal = false) {
+      const ctx = canvas.getContext('2d');
+      const gradient = horizontal
+        ? ctx.createLinearGradient(0, 0, canvas.width || 420, 0)
+        : ctx.createLinearGradient(0, 0, 0, canvas.height || 220);
+      gradient.addColorStop(0, colors[0]);
+      gradient.addColorStop(1, colors[1]);
+      return gradient;
+    }
 
     async function loadCharts() {
       try {
-        const res = await fetch('/api/admin/borrows');
+        const user = await AUTH.loadCurrentUser();
+        if (!AUTH.isAdmin(user)) {
+          return;
+        }
+        const res = await fetch('/api/admin/borrows', {
+          headers: AUTH.buildAuthHeaders(user)
+        });
         if (!res.ok) return;
         const records = await res.json();
         if (!Array.isArray(records)) return;
@@ -694,12 +731,20 @@
         });
         const sortedBooks = Object.entries(bookCount).sort((a, b) => b[1] - a[1]).slice(0, 7);
         if (chartBooks) chartBooks.destroy();
+        const booksCanvas = document.getElementById('chartBooks');
+        const bookGradients = sortedBooks.map((_, index) => createLinearGradient(
+          booksCanvas,
+          bookChartGradientPairs[index % bookChartGradientPairs.length],
+          true
+        ));
         chartBooks = new Chart(document.getElementById('chartBooks'), {
           type: 'bar',
           data: {
             labels: sortedBooks.map(e => e[0]),
             datasets: [{ label: '借阅次数', data: sortedBooks.map(e => e[1]),
-              backgroundColor: '#2f6d4f', borderRadius: 5, borderSkipped: false }]
+              backgroundColor: bookGradients,
+              hoverBackgroundColor: bookGradients,
+              borderColor: '#fffdf8', borderWidth: 1.5, borderRadius: 5, borderSkipped: false }]
           },
           options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
@@ -715,12 +760,15 @@
         const sc = { BORROWED: 0, RETURNED: 0, OVERDUE: 0 };
         records.forEach(r => { if (sc[r.status] !== undefined) sc[r.status]++; });
         if (chartStatus) chartStatus.destroy();
+        const statusCanvas = document.getElementById('chartStatus');
+        const statusGradients = statusChartGradientPairs.map(colors => createLinearGradient(statusCanvas, colors));
         chartStatus = new Chart(document.getElementById('chartStatus'), {
           type: 'doughnut',
           data: {
             labels: ['借阅中', '已归还', '逾期'],
             datasets: [{ data: [sc.BORROWED, sc.RETURNED, sc.OVERDUE],
-              backgroundColor: ['#2f6d4f', '#8aaa98', '#bb3f3f'],
+              backgroundColor: statusGradients,
+              hoverBackgroundColor: statusGradients,
               borderWidth: 2, borderColor: '#fffdf8' }]
           },
           options: {

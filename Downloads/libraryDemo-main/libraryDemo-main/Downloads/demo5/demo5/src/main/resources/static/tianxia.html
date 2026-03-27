@@ -111,6 +111,19 @@
       color: #fff;
     }
 
+    .site-nav-home {
+      background: linear-gradient(180deg, #f4d97d 0%, #d4a33a 100%);
+      border-color: rgba(255, 236, 181, 0.92);
+      color: #3b2a08;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(116, 78, 10, 0.24);
+    }
+
+    .site-nav-home:hover {
+      background: linear-gradient(180deg, #f7e3a1 0%, #dda940 100%);
+      color: #fff;
+    }
+
     .nav-user {
       display: inline-flex;
       align-items: center;
@@ -932,11 +945,10 @@
         <p class="site-title-sub">发现好书 · 了解公告 · 探索世界</p>
       </div>
       <nav class="site-nav">
-        <a href="/">返回首页</a>
+        <a id="nav-home" class="site-nav-home" href="/index.html" hidden>后台进入</a>
         <a id="nav-login" href="/login.html">用户登录</a>
         <a id="nav-register" href="/register.html">用户注册</a>
         <a href="/profile.html">我的借阅</a>
-        <a href="/admin/announcements.html">公告后台</a>
         <span id="nav-user" class="nav-user" hidden></span>
         <button id="nav-logout" class="nav-logout" type="button" hidden>登出</button>
       </nav>
@@ -974,8 +986,9 @@
     </div>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script>
-    const STORAGE_KEY = 'demo5_current_user';
+    const AUTH = window.Demo5Auth;
     const bookListEl = document.getElementById('book-list');
     const recommendedListEl = document.getElementById('recommended-list');
     const announcementListEl = document.getElementById('announcement-list');
@@ -983,6 +996,7 @@
     const bookDetailPanelEl = document.getElementById('book-detail-panel');
     const bookPaginationEl = document.getElementById('book-pagination');
     const borrowStatsEl = document.getElementById('borrow-stats');
+    const navHomeEl = document.getElementById('nav-home');
     const navUserEl = document.getElementById('nav-user');
     const navLogoutEl = document.getElementById('nav-logout');
 
@@ -994,11 +1008,14 @@
     let selectedBookId = null;
     let activeBorrowMap = {}; // bookId -> borrowRecordId
 
-    function syncAuthUi() {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+    async function syncAuthUi() {
+      const user = await AUTH.loadCurrentUser();
+      const username = user?.username || '';
       const loggedIn = !!username;
+      const isAdmin = AUTH.isAdmin(user);
       document.getElementById('nav-login').hidden = loggedIn;
       document.getElementById('nav-register').hidden = loggedIn;
+      navHomeEl.hidden = !isAdmin;
       if (!loggedIn) {
         navUserEl.hidden = true;
         navLogoutEl.hidden = true;
@@ -1006,7 +1023,7 @@
       }
       navUserEl.hidden = false;
       navLogoutEl.hidden = false;
-      navUserEl.textContent = `当前用户：${username}`;
+      navUserEl.textContent = `当前用户：${username}${isAdmin ? '（管理员）' : ''}`;
     }
 
     function escapeHtml(text) {
@@ -1300,7 +1317,7 @@
 
     async function handleBorrowAction(btn) {
       if (!btn || btn.disabled) return;
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       if (!username) {
         alert('请先登录');
         window.location.href = '/login.html';
@@ -1338,7 +1355,7 @@
     }
 
     async function submitReview(form) {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       if (!username) {
         alert('请先登录后再发布评价');
         window.location.href = '/login.html';
@@ -1448,7 +1465,7 @@
     }
 
     function borrowBtnHtml(book) {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       if (!username) return '';
       const borrowId = activeBorrowMap[book.id];
       if (borrowId != null) {
@@ -1461,7 +1478,7 @@
     }
 
     async function loadUserBorrows() {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       if (!username) {
         activeBorrowMap = {};
         return;
@@ -1621,7 +1638,7 @@
     });
 
     navLogoutEl.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
+      AUTH.clearUser();
       syncAuthUi();
       window.location.href = '/login.html';
     });

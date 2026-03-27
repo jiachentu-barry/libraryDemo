@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.demo5.entity.AppUser;
 import com.example.demo5.entity.Announcement;
 import com.example.demo5.enums.AnnouncementStatus;
+import com.example.demo5.enums.UserRole;
 import com.example.demo5.repository.AnnouncementRepository;
+import com.example.demo5.repository.AppUserRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,13 +27,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnnouncementController {
 
     private final AnnouncementRepository announcementRepository;
+    private final AppUserRepository appUserRepository;
 
-    public AnnouncementController(AnnouncementRepository announcementRepository) {
+    public AnnouncementController(AnnouncementRepository announcementRepository, AppUserRepository appUserRepository) {
         this.announcementRepository = announcementRepository;
+        this.appUserRepository = appUserRepository;
     }
 
     @PostMapping("/admin/announcements")
-    public ResponseEntity<?> createAnnouncement(@RequestBody AnnouncementRequest request) {
+    public ResponseEntity<?> createAnnouncement(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                                @RequestBody AnnouncementRequest request) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         String title = request.title() == null ? "" : request.title().trim();
         String content = request.content() == null ? "" : request.content().trim();
         AnnouncementStatus status = parseStatus(request.status());
@@ -55,7 +66,13 @@ public class AnnouncementController {
     }
 
     @PutMapping("/admin/announcements/{id}")
-    public ResponseEntity<?> updateAnnouncement(@PathVariable Long id, @RequestBody AnnouncementRequest request) {
+    public ResponseEntity<?> updateAnnouncement(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                                @PathVariable Long id,
+                                                @RequestBody AnnouncementRequest request) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         Announcement announcement = announcementRepository.findById(id)
                 .orElse(null);
         if (announcement == null) {
@@ -85,8 +102,12 @@ public class AnnouncementController {
     }
 
     @GetMapping("/admin/announcements")
-    public List<Announcement> listAnnouncementsForAdmin() {
-        return announcementRepository.findAllByOrderByPublishedAtDesc();
+    public ResponseEntity<?> listAnnouncementsForAdmin(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
+        return ResponseEntity.ok(announcementRepository.findAllByOrderByPublishedAtDesc());
     }
 
     @GetMapping("/announcements")
@@ -106,6 +127,21 @@ public class AnnouncementController {
         } catch (IllegalArgumentException ex) {
             return null;
         }
+    }
+
+    private ResponseEntity<ApiMessage> requireAdmin(String authUsername) {
+        String username = authUsername == null ? "" : authUsername.trim();
+        if (username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("请先登录管理员账号"));
+        }
+        AppUser user = appUserRepository.findByUsernameIgnoreCase(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("用户不存在"));
+        }
+        if (user.getRole() != UserRole.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiMessage("仅管理员可访问后台管理"));
+        }
+        return null;
     }
 
     public record AnnouncementRequest(String title, String content, String status) {

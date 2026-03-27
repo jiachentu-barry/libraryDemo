@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 管理员管理</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --text: #1f2a44;
+      --muted: #6f7b94;
+      --line: #dbe2f0;
+      --primary: #1a73e8;
+      --primary-dark: #155dc0;
+      --danger: #c53b3b;
+      --ok: #1f8a4c;
+      --warn: #9a6a1a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(140deg, #eff4ff, var(--bg));
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1120px, 94vw);
+      margin: 36px auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 1.5rem;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .admin-nav a {
+      color: #2f4b7a;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 7px 14px;
+      border: 1px solid #cdd9ef;
+      border-radius: 999px;
+      background: #f1f6ff;
+      transition: border-color 180ms, color 180ms, background 180ms;
+    }
+
+    .admin-nav a:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: #e9f1ff;
+    }
+
+    .admin-nav a.active {
+      color: #fff;
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      font: inherit;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      min-width: 180px;
+      color: var(--text);
+      background: #fff;
+    }
+
+    .toolbar button {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+    }
+
+    .toolbar button:hover {
+      background: var(--primary-dark);
+    }
+
+    .status {
+      margin: 0;
+      min-height: 1.4em;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .responsive-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+
+    tbody tr:hover td {
+      background: #f7faff;
+    }
+
+    .role-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .role-tag.ADMIN {
+      background: #e7f1ff;
+      border-color: #c7ddff;
+      color: #245fb7;
+    }
+
+    .role-tag.USER {
+      background: #f6f8fc;
+      border-color: #dde4f2;
+      color: #596580;
+    }
+
+    .role-editor {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .role-editor select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font: inherit;
+      font-size: 0.88rem;
+      color: var(--text);
+      background: #fff;
+    }
+
+    .role-editor button {
+      border: 0;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+    }
+
+    .role-editor button:hover {
+      background: var(--primary-dark);
+    }
+
+    .role-editor button:disabled {
+      cursor: not-allowed;
+      background: #9fb7db;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--muted);
+      padding: 14px;
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <h1>后台管理 - 管理员管理</h1>
+      <nav class="admin-nav" aria-label="后台管理导航">
+        <a href="/index.html">后台首页</a>
+        <a href="/admin/books.html">图书编辑</a>
+        <a href="/admin/book-upload.html">图书上传</a>
+        <a href="/admin/borrows.html">借阅总览</a>
+        <a href="/admin/announcements.html">公告管理</a>
+        <a href="/admin/reviews.html">评论总览</a>
+        <a class="active" href="/admin/users.html">管理员管理</a>
+      </nav>
+
+      <div class="toolbar">
+        <input id="keyword" type="search" placeholder="搜索用户名" />
+        <select id="roleFilter">
+          <option value="ALL">全部角色</option>
+          <option value="ADMIN">仅管理员</option>
+          <option value="USER">仅普通用户</option>
+        </select>
+        <button id="refreshBtn" type="button">刷新</button>
+        <p id="status" class="status"></p>
+      </div>
+
+      <div id="tableWrap" class="responsive-wrap" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>用户名</th>
+              <th>当前角色</th>
+              <th>修改角色</th>
+              <th>创建时间</th>
+            </tr>
+          </thead>
+          <tbody id="userList"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="empty" hidden>暂无用户数据</p>
+    </section>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const AUTH = window.Demo5Auth;
+    const adminHeaders = () => AUTH.buildAuthHeaders(AUTH.getStoredUser());
+    AUTH.requireAdminPage();
+
+    const keywordEl = document.getElementById('keyword');
+    const roleFilterEl = document.getElementById('roleFilter');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const statusEl = document.getElementById('status');
+    const tableWrapEl = document.getElementById('tableWrap');
+    const userListEl = document.getElementById('userList');
+    const emptyEl = document.getElementById('empty');
+
+    let users = [];
+
+    function setStatus(message, mode) {
+      statusEl.textContent = message || '';
+      statusEl.className = mode ? `status ${mode}` : 'status';
+    }
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return '-';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+      return date.toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function getFilteredUsers() {
+      const keyword = String(keywordEl.value || '').trim().toLowerCase();
+      const roleFilter = String(roleFilterEl.value || 'ALL');
+      return users.filter((item) => {
+        if (roleFilter !== 'ALL' && item.role !== roleFilter) {
+          return false;
+        }
+        if (!keyword) {
+          return true;
+        }
+        return String(item.username || '').toLowerCase().includes(keyword);
+      });
+    }
+
+    function renderUsers() {
+      const list = getFilteredUsers();
+      userListEl.innerHTML = '';
+
+      if (!list.length) {
+        tableWrapEl.hidden = true;
+        emptyEl.hidden = false;
+        return;
+      }
+
+      tableWrapEl.hidden = false;
+      emptyEl.hidden = true;
+
+      list.forEach((item) => {
+        const row = document.createElement('tr');
+        const role = item.role === 'ADMIN' ? 'ADMIN' : 'USER';
+        row.innerHTML = `
+          <td>${Number(item.id) || '-'}</td>
+          <td>${escapeHtml(item.username)}</td>
+          <td><span class="role-tag ${role}">${role === 'ADMIN' ? '管理员' : '普通用户'}</span></td>
+          <td>
+            <div class="role-editor">
+              <select data-role-select data-id="${item.id}">
+                <option value="USER" ${role === 'USER' ? 'selected' : ''}>普通用户</option>
+                <option value="ADMIN" ${role === 'ADMIN' ? 'selected' : ''}>管理员</option>
+              </select>
+              <button type="button" data-save-role data-id="${item.id}">保存</button>
+            </div>
+          </td>
+          <td>${escapeHtml(formatTime(item.createdAt))}</td>
+        `;
+        userListEl.appendChild(row);
+      });
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/admin/users', {
+          headers: adminHeaders()
+        });
+        const data = await res.json().catch(() => []);
+        if (!res.ok) {
+          throw new Error(data.message || '用户列表加载失败');
+        }
+        users = Array.isArray(data) ? data : [];
+        renderUsers();
+        setStatus(`共 ${users.length} 位用户`, 'ok');
+      } catch (error) {
+        users = [];
+        renderUsers();
+        setStatus(error.message || '用户列表加载失败', 'error');
+      }
+    }
+
+    async function saveUserRole(id, role, button) {
+      button.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/users/${id}/role`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...adminHeaders()
+          },
+          body: JSON.stringify({ role })
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(body.message || '角色更新失败');
+        }
+        setStatus(`用户 ${body.username || id} 的角色已更新`, 'ok');
+        await loadUsers();
+      } catch (error) {
+        setStatus(error.message || '角色更新失败', 'error');
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    userListEl.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      const button = target.closest('button[data-save-role]');
+      if (!button) {
+        return;
+      }
+      const id = Number(button.dataset.id || '0');
+      if (!id) {
+        return;
+      }
+      const select = userListEl.querySelector(`select[data-role-select][data-id="${id}"]`);
+      if (!(select instanceof HTMLSelectElement)) {
+        return;
+      }
+      const role = select.value === 'ADMIN' ? 'ADMIN' : 'USER';
+      await saveUserRole(id, role, button);
+    });
+
+    keywordEl.addEventListener('input', renderUsers);
+    roleFilterEl.addEventListener('change', renderUsers);
+    refreshBtn.addEventListener('click', loadUsers);
+
+    loadUsers();
+  </script>
+</body>
+</html>

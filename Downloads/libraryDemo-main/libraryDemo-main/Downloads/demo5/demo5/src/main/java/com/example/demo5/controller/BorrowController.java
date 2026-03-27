@@ -11,6 +11,7 @@ import com.example.demo5.entity.AppUser;
 import com.example.demo5.entity.Book;
 import com.example.demo5.entity.BorrowRecord;
 import com.example.demo5.enums.BorrowStatus;
+import com.example.demo5.enums.UserRole;
 import com.example.demo5.repository.AppUserRepository;
 import com.example.demo5.repository.BookRepository;
 import com.example.demo5.repository.BorrowRepository;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -125,15 +127,24 @@ public class BorrowController {
 
     /** 管理员查看所有借阅记录 */
     @GetMapping("/admin/borrows")
-    public List<BorrowRecordResponse> adminListBorrows() {
-        return borrowRepository.findAllByOrderByBorrowedAtDesc()
-                .stream().map(this::toResponse).toList();
+    public ResponseEntity<?> adminListBorrows(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
+        return ResponseEntity.ok(borrowRepository.findAllByOrderByBorrowedAtDesc()
+                .stream().map(this::toResponse).toList());
     }
 
     /** 管理员强制归还 */
     @Transactional
     @PostMapping("/admin/borrow/{id}/return")
-    public ResponseEntity<?> adminReturnBook(@PathVariable Long id) {
+    public ResponseEntity<?> adminReturnBook(@RequestHeader(value = "X-Auth-Username", required = false) String authUsername,
+                                             @PathVariable Long id) {
+        ResponseEntity<ApiMessage> adminCheck = requireAdmin(authUsername);
+        if (adminCheck != null) {
+            return adminCheck;
+        }
         BorrowRecord record = borrowRepository.findById(id).orElse(null);
         if (record == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiMessage("借阅记录不存在"));
@@ -148,6 +159,21 @@ public class BorrowController {
         bookRepository.save(book);
         borrowRepository.save(record);
         return ResponseEntity.ok(new ApiMessage("归还成功"));
+    }
+
+    private ResponseEntity<ApiMessage> requireAdmin(String authUsername) {
+        String username = authUsername == null ? "" : authUsername.trim();
+        if (username.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("请先登录管理员账号"));
+        }
+        AppUser user = appUserRepository.findByUsernameIgnoreCase(username).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiMessage("用户不存在"));
+        }
+        if (user.getRole() != UserRole.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiMessage("仅管理员可访问后台管理"));
+        }
+        return null;
     }
 
         /** 借阅统计（昨日、今日、借阅最多图书） */

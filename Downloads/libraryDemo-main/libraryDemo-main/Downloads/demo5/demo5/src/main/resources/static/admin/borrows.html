@@ -6,16 +6,17 @@
   <title>后台管理 - 借阅总览</title>
   <style>
     :root {
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #1f2a44;
-      --muted: #6f7b94;
-      --line: #dbe2f0;
-      --primary: #1a73e8;
-      --primary-dark: #155dc0;
-      --danger: #c53b3b;
-      --ok: #1f8a4c;
-      --warn: #9a6a1a;
+      --bg-1: #f6f2e7;
+      --bg-2: #e8f1e5;
+      --paper: #fffdf8;
+      --ink: #2a2f24;
+      --subtle: #6d7461;
+      --line: #d8d2c0;
+      --accent: #2f6d4f;
+      --accent-2: #1f5039;
+      --danger: #bb3f3f;
+      --ok: #2f6d4f;
+      --warn: #9d5b2c;
     }
 
     * {
@@ -24,70 +25,124 @@
 
     body {
       margin: 0;
-      font-family: "Microsoft YaHei", sans-serif;
-      background: linear-gradient(140deg, #eff4ff, var(--bg));
-      color: var(--text);
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 12% 8%, #f1e2c8 0 20%, transparent 21%),
+        radial-gradient(circle at 88% 14%, #cfe4d5 0 24%, transparent 25%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
     }
 
     .container {
-      width: min(1120px, 94vw);
-      margin: 36px auto;
+      width: min(1200px, 94vw);
+      margin: 30px auto;
     }
 
     .card {
-      background: var(--card);
+      background: color-mix(in srgb, var(--paper) 90%, white 10%);
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 18px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 12px 30px rgba(42, 47, 36, 0.08);
     }
 
     h1 {
       margin: 0 0 10px;
-      font-size: 1.5rem;
+      letter-spacing: 0.02em;
+      font-size: 1.6rem;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--subtle);
+      font-size: 0.95rem;
     }
 
     .admin-nav {
       display: flex;
       gap: 10px;
-      margin-bottom: 10px;
       flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     .admin-nav a {
-      color: #2f4b7a;
+      color: #415041;
       text-decoration: none;
       font-weight: 700;
-      padding: 7px 14px;
-      border: 1px solid #cdd9ef;
+      padding: 8px 14px;
+      border: 1px solid #d3ddce;
       border-radius: 999px;
-      background: #f1f6ff;
+      background: #f3f8f0;
       transition: border-color 180ms, color 180ms, background 180ms;
+      font-size: 0.9rem;
     }
 
     .admin-nav a:hover {
-      color: var(--primary);
-      border-color: var(--primary);
-      background: #e9f1ff;
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #ecf5ef;
     }
 
     .admin-nav a.active {
+      border-color: var(--accent);
       color: #fff;
-      border-color: var(--primary);
-      background: var(--primary);
+      background: var(--accent);
     }
 
     .top-links {
       display: flex;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
       flex-wrap: wrap;
     }
 
     .top-links a {
-      color: var(--primary);
+      color: var(--accent);
       text-decoration: none;
       font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .top-links a:hover {
+      text-decoration: underline;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #f4fbf6 0%, #e4f0e8 100%);
+      border: 1px solid #b8e2c4;
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--subtle);
+      margin: 0 0 6px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0;
     }
 
     .toolbar {
@@ -95,23 +150,37 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: linear-gradient(180deg, #faf8f3 0%, #f5f0e8 100%);
+      border-radius: 12px;
+      border: 1px solid #e8dfd0;
     }
 
     .toolbar input,
     .toolbar select,
     .toolbar button {
       font: inherit;
-      border-radius: 10px;
+      font-family: "Microsoft YaHei", sans-serif;
+      border-radius: 8px;
     }
 
     .toolbar input,
     .toolbar select {
       border: 1px solid var(--line);
-      padding: 9px 10px;
+      padding: 9px 12px;
       background: #fff;
-      color: var(--text);
-      min-width: 220px;
+      color: var(--ink);
+      flex: 1;
+      min-width: 160px;
+      transition: border-color 180ms;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 109, 79, 0.1);
     }
 
     .toolbar button {
@@ -120,16 +189,20 @@
       cursor: pointer;
       font-weight: 700;
       color: #fff;
-      background: var(--primary);
+      background: var(--accent);
+      transition: background 180ms;
+      white-space: nowrap;
     }
 
     .toolbar button:hover {
-      background: var(--primary-dark);
+      background: var(--accent-2);
     }
 
     .status {
       margin: 0;
       font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--subtle);
     }
 
     .status.ok {
@@ -140,66 +213,112 @@
       color: var(--danger);
     }
 
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .responsive-wrap {
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
+      background: #fff;
     }
 
     th,
     td {
       border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
+      padding: 12px 10px;
       text-align: left;
       vertical-align: middle;
       font-size: 0.92rem;
     }
 
     th {
-      color: var(--muted);
-      font-size: 0.82rem;
-      white-space: nowrap;
+      background: linear-gradient(180deg, #f4efdf 0%, #ede5d2 100%);
+      color: #566148;
       font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      transition: background 120ms;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #fcf9f1;
+    }
+
+    tbody tr:hover td {
+      background: #eef6f0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
     }
 
     .status-badge {
       display: inline-flex;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.80rem;
       font-weight: 700;
-      border: 1px solid var(--line);
+      border: 1px solid;
+      white-space: nowrap;
     }
 
     .status-badge.borrowed {
-      color: var(--ok);
-      background: #ecf9f0;
-      border-color: #cdebd8;
+      color: #1f6d3a;
+      background: #e8f7ec;
+      border-color: #b8e2c4;
     }
 
     .status-badge.returned {
-      color: #5b677f;
-      background: #f1f4fa;
-      border-color: #d5ddeb;
+      color: #666;
+      background: #f5f3ed;
+      border-color: #ddd3c8;
     }
 
     .status-badge.overdue {
-      color: var(--warn);
-      background: #fff6e6;
-      border-color: #f0dcb5;
+      color: #8c6211;
+      background: #fff5df;
+      border-color: #f2dfb5;
     }
 
     .btn-return {
       border: 0;
-      border-radius: 999px;
+      border-radius: 8px;
       padding: 6px 12px;
       color: #fff;
-      background: #60718f;
+      background: #7d8674;
       cursor: pointer;
       font-weight: 700;
+      font-size: 0.8rem;
+      transition: background 180ms;
     }
 
-    .btn-return:hover {
-      background: #4d5b73;
+    .btn-return:hover:not(:disabled) {
+      background: #656d5c;
+    }
+
+    .btn-return:active:not(:disabled) {
+      transform: scale(0.96);
     }
 
     .btn-return:disabled {
@@ -208,16 +327,100 @@
     }
 
     .empty {
-      color: var(--muted);
-      margin: 8px 0 0;
+      color: var(--subtle);
+      margin: 20px 0 0;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.95rem;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      th,
+      td {
+        padding: 10px 8px;
+        font-size: 0.88rem;
+      }
+
+      .toolbar input,
+      .toolbar select {
+        min-width: 130px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: min(100%, 96vw);
+        margin: 20px auto;
+      }
+
+      .card {
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .toolbar input,
+      .toolbar select,
+      .toolbar button {
+        width: 100%;
+      }
+
       .responsive-wrap {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
+
       table {
-        min-width: 980px;
+        min-width: 900px;
+      }
+
+      th,
+      td {
+        padding: 9px 8px;
+        font-size: 0.84rem;
+      }
+
+      .btn-return {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      .admin-nav a {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      table {
+        min-width: 650px;
+      }
+
+      th,
+      td {
+        padding: 8px 6px;
+        font-size: 0.80rem;
       }
     }
   </style>
@@ -225,19 +428,37 @@
 <body>
   <div class="container">
     <section class="card">
-      <h1>后台管理 - 借阅总览</h1>
+      <h1>借阅总览</h1>
+      <p class="subtitle">管理图书借阅和归还记录</p>
       <nav class="admin-nav" aria-label="后台管理导航">
-          <a href="/">后台首页</a>
+        <a href="/index.html">后台首页</a>
         <a href="/admin/books.html">图书编辑</a>
         <a href="/admin/book-upload.html">图书上传</a>
         <a class="active" href="/admin/borrows.html">借阅总览</a>
         <a href="/admin/announcements.html">公告管理</a>
         <a href="/admin/reviews.html">评论总览</a>
+        <a href="/admin/users.html">管理员管理</a>
       </nav>
-      <div class="top-links">
-        <a href="/">返回首页</a>
-        <a href="/profile.html">我的借阅页</a>
+
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-label">借阅中</div>
+          <p class="stat-value" id="stat-borrowed">0</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">逾期</div>
+          <p class="stat-value" id="stat-overdue">0</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">已归还</div>
+          <p class="stat-value" id="stat-returned">0</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">全部</div>
+          <p class="stat-value" id="stat-total">0</p>
+        </div>
       </div>
+
       <div class="toolbar">
         <input id="keyword" type="search" placeholder="搜索用户名、书名、作者" />
         <select id="statusFilter">
@@ -249,29 +470,37 @@
         <button id="refreshBtn" type="button">刷新</button>
         <p id="status" class="status"></p>
       </div>
-      <div class="responsive-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>用户名</th>
-              <th>书名</th>
-              <th>作者</th>
-              <th>借出时间</th>
-              <th>应还时间</th>
-              <th>归还时间</th>
-              <th>状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="recordList"></tbody>
-        </table>
+
+      <div class="table-wrap">
+        <div class="responsive-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>书名</th>
+                <th>作者</th>
+                <th>借出时间</th>
+                <th>应还时间</th>
+                <th>归还时间</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="recordList"></tbody>
+          </table>
+        </div>
       </div>
       <p id="empty" class="empty" hidden>暂无借阅记录</p>
     </section>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script>
+    const AUTH = window.Demo5Auth;
+    const adminHeaders = () => AUTH.buildAuthHeaders(AUTH.getStoredUser());
+    AUTH.requireAdminPage();
+
     const keywordEl = document.getElementById('keyword');
     const statusFilterEl = document.getElementById('statusFilter');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -279,7 +508,24 @@
     const recordListEl = document.getElementById('recordList');
     const emptyEl = document.getElementById('empty');
 
+    const statBorrowedEl = document.getElementById('stat-borrowed');
+    const statOverdueEl = document.getElementById('stat-overdue');
+    const statReturnedEl = document.getElementById('stat-returned');
+    const statTotalEl = document.getElementById('stat-total');
+
     let records = [];
+
+    function updateStats() {
+      const borrowed = records.filter(r => r.status === 'BORROWED').length;
+      const overdue = records.filter(r => r.status === 'OVERDUE').length;
+      const returned = records.filter(r => r.status === 'RETURNED').length;
+      const total = records.length;
+
+      statBorrowedEl.textContent = borrowed;
+      statOverdueEl.textContent = overdue;
+      statReturnedEl.textContent = returned;
+      statTotalEl.textContent = total;
+    }
 
     function setStatus(message, isError) {
       statusEl.textContent = message || '';
@@ -355,7 +601,7 @@
           <td>${formatTime(item.returnedAt)}</td>
           <td><span class="status-badge ${statusClass(item.status)}">${statusLabel(item.status)}</span></td>
           <td>
-            ${canForceReturn ? `<button class="btn-return" data-id="${item.id}">强制归还</button>` : '-'}
+            ${canForceReturn ? `<button class="btn-return" data-id="${item.id}">强制归还</button>` : '—'}
           </td>
         `;
         recordListEl.appendChild(tr);
@@ -364,16 +610,20 @@
 
     async function loadRecords() {
       try {
-        const res = await fetch('/api/admin/borrows');
+        const res = await fetch('/api/admin/borrows', {
+          headers: adminHeaders()
+        });
         if (!res.ok) {
           throw new Error('借阅记录加载失败');
         }
         const data = await res.json();
         records = Array.isArray(data) ? data : [];
+        updateStats();
         render();
         setStatus(`共 ${records.length} 条记录`, false);
       } catch (error) {
         records = [];
+        updateStats();
         render();
         setStatus('加载失败，请稍后重试', true);
       }
@@ -391,7 +641,8 @@
       button.disabled = true;
       try {
         const res = await fetch(`/api/admin/borrow/${id}/return`, {
-          method: 'POST'
+          method: 'POST',
+          headers: adminHeaders()
         });
         const data = await res.json();
         if (!res.ok) {

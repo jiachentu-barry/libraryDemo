@@ -34,6 +34,7 @@
     }
 
     .wrap {
+      padding: 9px 16px;
       width: min(1100px, 94vw);
       margin: 30px auto;
     }
@@ -345,12 +346,13 @@
       <p class="subtitle">查看、分页管理、删除图书，也可进入上传页修改图书信息。</p>
 
       <nav class="admin-nav" aria-label="后台管理导航">
-        <a href="/">后台首页</a>
+        <a href="/index.html">后台首页</a>
         <a class="active" href="/admin/books.html">图书编辑</a>
         <a href="/admin/book-upload.html">图书上传</a>
         <a href="/admin/borrows.html">借阅总览</a>
         <a href="/admin/announcements.html">公告管理</a>
         <a href="/admin/reviews.html">评论总览</a>
+        <a href="/admin/users.html">管理员管理</a>
       </nav>
 
       <div class="actions">
@@ -379,7 +381,12 @@
     </section>
   </main>
 
+  <script src="/js/auth.js"></script>
   <script>
+    const AUTH = window.Demo5Auth;
+    const adminHeaders = () => AUTH.buildAuthHeaders(AUTH.getStoredUser());
+    AUTH.requireAdminPage();
+
     const bookStatusEl = document.getElementById('book-status');
     const bookListEl = document.getElementById('book-list');
     const bookPaginationEl = document.getElementById('book-pagination');
@@ -515,7 +522,8 @@
     async function deleteBook(id) {
       try {
         const res = await fetch(`/api/books/${id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: adminHeaders()
         });
         if (!res.ok) {
           const errorBody = await res.json().catch(() => ({}));

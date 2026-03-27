@@ -1,0 +1,5 @@
+id,userId,username,bookId,bookTitle,borrowedAt,dueDate,returnedAt,status
+9,6,xiaoming,8,红楼梦,2026-03-26 15:21:32,2026-04-09 15:21:32,2026-03-26 15:21:42,RETURNED
+10,6,xiaoming,7,三国演义,2026-03-26 15:21:37,2026-04-09 15:21:37,,BORROWED
+11,6,xiaoming,11,海贼王,2026-03-26 15:41:38,2026-04-09 15:41:38,,BORROWED
+12,6,xiaoming,10,火影忍者,2026-03-26 15:41:41,2026-04-09 15:41:41,2026-03-26 15:41:48,RETURNED

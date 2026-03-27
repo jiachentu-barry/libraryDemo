@@ -187,12 +187,13 @@
       <p class="subtitle">在此新增图书，或从图书列表页进入编辑模式。</p>
 
       <nav class="admin-nav" aria-label="后台管理导航">
-        <a href="/">后台首页</a>
+        <a href="/index.html">后台首页</a>
         <a href="/admin/books.html">图书编辑</a>
         <a class="active" href="/admin/book-upload.html">图书上传</a>
         <a href="/admin/borrows.html">借阅总览</a>
         <a href="/admin/announcements.html">公告管理</a>
         <a href="/admin/reviews.html">评论总览</a>
+        <a href="/admin/users.html">管理员管理</a>
       </nav>
 
       <form id="book-form" class="book-form">
@@ -241,7 +242,12 @@
     </section>
   </main>
 
+  <script src="/js/auth.js"></script>
   <script>
+    const AUTH = window.Demo5Auth;
+    const adminHeaders = () => AUTH.buildAuthHeaders(AUTH.getStoredUser());
+    AUTH.requireAdminPage();
+
     const form = document.getElementById('book-form');
     const titleInput = document.getElementById('book-title');
     const authorInput = document.getElementById('book-author');
@@ -374,7 +380,10 @@
 
         const res = await fetch(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...adminHeaders()
+          },
           body: JSON.stringify(payload)
         });
 
@@ -386,7 +395,7 @@
         if (isEdit) {
           setStatus('图书已更新，正在返回列表…', false);
           setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/index.html';
           }, 800);
           return;
         }

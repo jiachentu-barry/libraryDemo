@@ -71,7 +71,8 @@
       font-weight: 700;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -111,14 +112,20 @@
 <body>
   <main class="card">
     <h1>用户登录</h1>
-    <p class="subtitle">登录后进入天下图书页面。</p>
+    <p class="subtitle">请选择登录身份：用户进入首页，管理员进入后台。</p>
 
     <div class="links">
-      <a href="/">返回首页</a>
+      <a href="/tianxia.html">返回首页</a>
       <a href="/register.html">去注册</a>
     </div>
 
     <form id="login-form">
+      <label for="login-role">登录身份</label>
+      <select id="login-role" required>
+        <option value="USER" selected>用户登录</option>
+        <option value="ADMIN">管理员登录</option>
+      </select>
+
       <label for="username">用户名</label>
       <input id="username" maxlength="20" placeholder="请输入用户名" required />
 
@@ -130,16 +137,19 @@
     </form>
   </main>
 
+  <script src="/js/auth.js"></script>
   <script>
-    const STORAGE_KEY = 'demo5_current_user';
+    const AUTH = window.Demo5Auth;
     const form = document.getElementById('login-form');
+    const loginRoleInput = document.getElementById('login-role');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const statusEl = document.getElementById('status');
     const submitBtn = document.getElementById('submit-btn');
 
-    if (localStorage.getItem(STORAGE_KEY)) {
-      window.location.href = '/tianxia.html';
+    const existingUser = AUTH.getStoredUser();
+    if (existingUser?.username) {
+      window.location.href = AUTH.isAdmin(existingUser) ? '/index.html' : '/tianxia.html';
     }
 
     function setStatus(message, mode) {
@@ -152,6 +162,7 @@
 
       const username = usernameInput.value.trim();
       const password = passwordInput.value;
+      const loginRole = loginRoleInput.value === 'ADMIN' ? 'ADMIN' : 'USER';
       if (!username || !password) {
         setStatus('请输入用户名和密码', 'error');
         return;
@@ -166,7 +177,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ username, password, loginRole })
         });
 
         const body = await res.json().catch(() => ({}));
@@ -174,10 +185,11 @@
           throw new Error(body.message || '登录失败');
         }
 
-        localStorage.setItem(STORAGE_KEY, username);
+        const user = body.user || { username, role: 'USER' };
+        AUTH.saveUser(user);
         setStatus(body.message || '登录成功，正在跳转...', 'ok');
         setTimeout(() => {
-          window.location.href = '/tianxia.html';
+          window.location.href = loginRole === 'ADMIN' ? '/index.html' : '/tianxia.html';
         }, 400);
       } catch (error) {
         setStatus(error.message || '登录失败', 'error');

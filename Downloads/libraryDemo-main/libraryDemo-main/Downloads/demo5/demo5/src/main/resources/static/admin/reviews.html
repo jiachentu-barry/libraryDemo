@@ -6,70 +6,115 @@
   <title>后台管理 - 评论总览</title>
   <style>
     :root {
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #1f2a44;
-      --muted: #6f7b94;
-      --line: #dbe2f0;
-      --primary: #1a73e8;
-      --primary-dark: #155dc0;
+      --bg-1: #f6f2e7;
+      --bg-2: #e8f1e5;
+      --paper: #fffdf8;
+      --ink: #2a2f24;
+      --subtle: #6d7461;
+      --line: #d8d2c0;
+      --accent: #2f6d4f;
+      --accent-2: #1f5039;
+      --danger: #bb3f3f;
+      --ok: #2f6d4f;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Microsoft YaHei", sans-serif;
-      background: linear-gradient(140deg, #eff4ff, var(--bg));
-      color: var(--text);
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(circle at 12% 8%, #f1e2c8 0 20%, transparent 21%),
+        radial-gradient(circle at 88% 14%, #cfe4d5 0 24%, transparent 25%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
     }
 
     .container {
-      width: min(1120px, 94vw);
-      margin: 36px auto;
+      width: min(1200px, 94vw);
+      margin: 30px auto;
     }
 
     .card {
-      background: var(--card);
+      background: color-mix(in srgb, var(--paper) 90%, white 10%);
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 18px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 12px 30px rgba(42, 47, 36, 0.08);
     }
 
     h1 {
       margin: 0 0 10px;
-      font-size: 1.5rem;
+      letter-spacing: 0.02em;
+      font-size: 1.6rem;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--subtle);
+      font-size: 0.95rem;
     }
 
     .admin-nav {
       display: flex;
       gap: 10px;
-      margin-bottom: 10px;
       flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     .admin-nav a {
-      color: #2f4b7a;
+      color: #415041;
       text-decoration: none;
       font-weight: 700;
-      padding: 7px 14px;
-      border: 1px solid #cdd9ef;
+      padding: 8px 14px;
+      border: 1px solid #d3ddce;
       border-radius: 999px;
-      background: #f1f6ff;
+      background: #f3f8f0;
       transition: border-color 180ms, color 180ms, background 180ms;
+      font-size: 0.9rem;
     }
 
     .admin-nav a:hover {
-      color: var(--primary);
-      border-color: var(--primary);
-      background: #e9f1ff;
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #ecf5ef;
     }
 
     .admin-nav a.active {
+      border-color: var(--accent);
       color: #fff;
-      border-color: var(--primary);
-      background: var(--primary);
+      background: var(--accent);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #f4fbf6 0%, #e4f0e8 100%);
+      border: 1px solid #b8e2c4;
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--subtle);
+      margin: 0 0 6px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0;
     }
 
     .toolbar {
@@ -77,21 +122,37 @@
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: linear-gradient(180deg, #faf8f3 0%, #f5f0e8 100%);
+      border-radius: 12px;
+      border: 1px solid #e8dfd0;
     }
 
     .toolbar input,
+    .toolbar select,
     .toolbar button {
       font: inherit;
-      border-radius: 10px;
+      font-family: "Microsoft YaHei", sans-serif;
+      border-radius: 8px;
     }
 
-    .toolbar input {
+    .toolbar input,
+    .toolbar select {
       border: 1px solid var(--line);
-      padding: 9px 10px;
+      padding: 9px 12px;
       background: #fff;
-      color: var(--text);
-      min-width: 280px;
+      color: var(--ink);
+      flex: 1;
+      min-width: 180px;
+      transition: border-color 180ms;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 109, 79, 0.1);
     }
 
     .toolbar button {
@@ -100,38 +161,73 @@
       cursor: pointer;
       font-weight: 700;
       color: #fff;
-      background: var(--primary);
+      background: var(--accent);
+      transition: background 180ms;
+      white-space: nowrap;
     }
 
     .toolbar button:hover {
-      background: var(--primary-dark);
+      background: var(--accent-2);
     }
 
-    .stat {
-      margin: 0;
-      font-weight: 700;
-      color: var(--muted);
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .responsive-wrap {
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      background: #fff;
     }
 
     th,
     td {
       border-bottom: 1px solid var(--line);
-      padding: 10px 8px;
+      padding: 12px 10px;
       text-align: left;
-      vertical-align: top;
+      vertical-align: middle;
       font-size: 0.92rem;
     }
 
     th {
-      color: var(--muted);
-      font-size: 0.82rem;
-      white-space: nowrap;
+      background: linear-gradient(180deg, #f4efdf 0%, #ede5d2 100%);
+      color: #566148;
       font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      transition: background 120ms;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #fcf9f1;
+    }
+
+    tbody tr:hover td {
+      background: #eef6f0;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
     }
 
     .rating-stars {
@@ -141,63 +237,254 @@
       white-space: nowrap;
     }
 
-    .empty {
-      color: var(--muted);
-      margin: 8px 0 0;
+    .review-text {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--ink);
     }
 
-    @media (max-width: 900px) {
-      .responsive-wrap { overflow-x: auto; }
-      table { min-width: 900px; }
+    .review-text.empty {
+      color: var(--subtle);
+      font-style: italic;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-delete {
+      border: 0;
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: #fff;
+      background: var(--danger);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.75rem;
+      transition: background 180ms;
+    }
+
+    .btn-delete:hover {
+      background: #a03333;
+    }
+
+    .empty {
+      color: var(--subtle);
+      margin: 20px 0 0;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 1024px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      th,
+      td {
+        padding: 10px 8px;
+        font-size: 0.88rem;
+      }
+
+      .review-text {
+        max-width: 250px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: min(100%, 96vw);
+        margin: 20px auto;
+      }
+
+      .card {
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .toolbar input,
+      .toolbar select,
+      .toolbar button {
+        width: 100%;
+      }
+
+      .responsive-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 850px;
+      }
+
+      th,
+      td {
+        padding: 9px 8px;
+        font-size: 0.84rem;
+      }
+
+      .review-text {
+        max-width: 200px;
+      }
+
+      .btn-delete {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      .admin-nav a {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      table {
+        min-width: 700px;
+      }
+
+      th,
+      td {
+        padding: 8px 6px;
+        font-size: 0.78rem;
+      }
+
+      .review-text {
+        max-width: 150px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <section class="card">
-      <h1>后台管理 - 评论总览</h1>
+      <h1>评论总览</h1>
+      <p class="subtitle">管理和查看图书评论、评分</p>
       <nav class="admin-nav" aria-label="后台管理导航">
-          <a href="/">后台首页</a>
+        <a href="/index.html">后台首页</a>
         <a href="/admin/books.html">图书编辑</a>
         <a href="/admin/book-upload.html">图书上传</a>
         <a href="/admin/borrows.html">借阅总览</a>
         <a href="/admin/announcements.html">公告管理</a>
         <a class="active" href="/admin/reviews.html">评论总览</a>
+        <a href="/admin/users.html">管理员管理</a>
       </nav>
+
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-label">全部评论</div>
+          <p class="stat-value" id="stat-total">0</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">平均评分</div>
+          <p class="stat-value" id="stat-avg">—</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">5星评论</div>
+          <p class="stat-value" id="stat-5star">0</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">1星评论</div>
+          <p class="stat-value" id="stat-1star">0</p>
+        </div>
+      </div>
 
       <div class="toolbar">
         <input id="keyword" type="search" placeholder="搜索图书名、用户名、评论内容" />
+        <select id="ratingFilter">
+          <option value="">全部评分</option>
+          <option value="5">5 星</option>
+          <option value="4">4 星</option>
+          <option value="3">3 星</option>
+          <option value="2">2 星</option>
+          <option value="1">1 星</option>
+        </select>
         <button id="refreshBtn" type="button">刷新</button>
-        <p id="stat" class="stat">评论总数：0</p>
       </div>
 
-      <div class="responsive-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>图书</th>
-              <th>用户</th>
-              <th>评分</th>
-              <th>评论</th>
-              <th>时间</th>
-            </tr>
-          </thead>
-          <tbody id="reviewList"></tbody>
-        </table>
+      <div class="table-wrap">
+        <div class="responsive-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>图书</th>
+                <th>用户</th>
+                <th>评分</th>
+                <th>评论</th>
+                <th>时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="reviewList"></tbody>
+          </table>
+        </div>
       </div>
       <p id="empty" class="empty" hidden>暂无评论</p>
     </section>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script>
+    const AUTH = window.Demo5Auth;
+    const adminHeaders = () => AUTH.buildAuthHeaders(AUTH.getStoredUser());
+    AUTH.requireAdminPage();
+
     const keywordEl = document.getElementById('keyword');
+    const ratingFilterEl = document.getElementById('ratingFilter');
     const refreshBtn = document.getElementById('refreshBtn');
-    const statEl = document.getElementById('stat');
     const reviewListEl = document.getElementById('reviewList');
     const emptyEl = document.getElementById('empty');
 
+    const statTotalEl = document.getElementById('stat-total');
+    const statAvgEl = document.getElementById('stat-avg');
+    const stat5starEl = document.getElementById('stat-5star');
+    const stat1starEl = document.getElementById('stat-1star');
+
     let reviews = [];
+
+    function updateStats() {
+      if (!reviews.length) {
+        statTotalEl.textContent = '0';
+        statAvgEl.textContent = '—';
+        stat5starEl.textContent = '0';
+        stat1starEl.textContent = '0';
+        return;
+      }
+
+      const total = reviews.length;
+      const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+      const avg = (sum / total).toFixed(1);
+      const fiveStar = reviews.filter(r => r.rating === 5).length;
+      const oneStar = reviews.filter(r => r.rating === 1).length;
+
+      statTotalEl.textContent = total;
+      statAvgEl.textContent = avg;
+      stat5starEl.textContent = fiveStar;
+      stat1starEl.textContent = oneStar;
+    }
 
     function escapeHtml(text) {
       return String(text || '')
@@ -216,7 +503,7 @@
       if (Number.isNaN(date.getTime())) {
         return value;
       }
-      return date.toLocaleString();
+      return date.toLocaleString('zh-CN', { hour12: false });
     }
 
     function starText(value) {
@@ -226,10 +513,15 @@
 
     function getFilteredReviews() {
       const keyword = String(keywordEl.value || '').trim().toLowerCase();
-      if (!keyword) {
-        return reviews;
-      }
+      const ratingFilter = ratingFilterEl.value;
+
       return reviews.filter((item) => {
+        if (ratingFilter && Number(item.rating) !== Number(ratingFilter)) {
+          return false;
+        }
+        if (!keyword) {
+          return true;
+        }
         const book = String(item.bookTitle || '').toLowerCase();
         const user = String(item.username || '').toLowerCase();
         const comment = String(item.comment || '').toLowerCase();
@@ -239,7 +531,6 @@
 
     function renderReviews() {
       const list = getFilteredReviews();
-      statEl.textContent = `评论总数：${reviews.length}`;
       reviewListEl.innerHTML = '';
 
       if (!list.length) {
@@ -250,13 +541,20 @@
       emptyEl.hidden = true;
       list.forEach((item) => {
         const row = document.createElement('tr');
+        const commentText = item.comment || '（未填写文字评价）';
+        const isEmptyComment = !item.comment;
         row.innerHTML = `
           <td>${Number(item.id) || '-'}</td>
           <td>${escapeHtml(item.bookTitle)}</td>
           <td>${escapeHtml(item.username)}</td>
           <td>${starText(item.rating)}</td>
-          <td>${escapeHtml(item.comment || '（未填写文字评价）')}</td>
-          <td>${escapeHtml(formatTime(item.createdAt))}</td>
+          <td><span class="review-text ${isEmptyComment ? 'empty' : ''}" title="${escapeHtml(commentText)}">${escapeHtml(commentText)}</span></td>
+          <td>${formatTime(item.createdAt)}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-delete" data-id="${item.id}">删除</button>
+            </div>
+          </td>
         `;
         reviewListEl.appendChild(row);
       });
@@ -270,14 +568,45 @@
         }
         const data = await res.json();
         reviews = Array.isArray(data) ? data : [];
+        updateStats();
         renderReviews();
       } catch (error) {
         reviews = [];
+        updateStats();
         renderReviews();
       }
     }
 
+    async function deleteReview(id) {
+      try {
+        const res = await fetch(`/api/admin/reviews/${id}`, {
+          method: 'DELETE',
+          headers: adminHeaders()
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => ({}));
+          throw new Error(errorBody.message || '删除失败');
+        }
+
+        await loadReviews();
+      } catch (error) {
+        alert(error.message || '删除失败');
+      }
+    }
+
+    reviewListEl.addEventListener('click', (event) => {
+      const deleteBtn = event.target.closest('.btn-delete');
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-id');
+        if (id && confirm('确定要删除这条评论吗？')) {
+          deleteReview(id);
+        }
+      }
+    });
+
     keywordEl.addEventListener('input', renderReviews);
+    ratingFilterEl.addEventListener('change', renderReviews);
     refreshBtn.addEventListener('click', loadReviews);
 
     loadReviews();

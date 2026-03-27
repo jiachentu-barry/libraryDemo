@@ -258,8 +258,9 @@
     </div>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script>
-    const STORAGE_KEY = 'demo5_current_user';
+    const AUTH = window.Demo5Auth;
     const navUserEl = document.getElementById('nav-user');
     const navLogoutEl = document.getElementById('nav-logout');
     const activeEl = document.getElementById('active-borrows');
@@ -280,15 +281,16 @@
       return Number.isNaN(d.getTime()) ? value : d.toLocaleString('zh-CN', { hour12: false });
     }
 
-    function syncAuthUi() {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+    async function syncAuthUi() {
+      const user = await AUTH.loadCurrentUser();
+      const username = user?.username || '';
       const loggedIn = !!username;
       document.getElementById('nav-login').hidden = loggedIn;
       document.getElementById('nav-register').hidden = loggedIn;
       if (!loggedIn) { navUserEl.hidden = true; navLogoutEl.hidden = true; return; }
       navUserEl.hidden = false;
       navLogoutEl.hidden = false;
-      navUserEl.textContent = `当前用户：${username}`;
+      navUserEl.textContent = `当前用户：${username}${AUTH.isAdmin(user) ? '（管理员）' : ''}`;
     }
 
     function statusBadge(status) {
@@ -327,7 +329,7 @@
     }
 
     async function loadBorrows() {
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       if (!username) {
         activeEl.innerHTML = '<p class="empty">请先<a href="/login.html">登录</a>后查看借阅记录</p>';
         historyEl.innerHTML = '';
@@ -355,7 +357,7 @@
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('.return-btn');
       if (!btn) return;
-      const username = localStorage.getItem(STORAGE_KEY) || '';
+      const username = AUTH.getStoredUsername();
       const borrowId = btn.dataset.borrowId;
       if (!username || !borrowId) return;
 
@@ -376,7 +378,7 @@
     });
 
     navLogoutEl.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
+      AUTH.clearUser();
       syncAuthUi();
       window.location.href = '/login.html';
     });

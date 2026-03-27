@@ -79,13 +79,20 @@
     <h1>系统公告</h1>
     <div class="top-links">
       <a href="/">返回首页</a>
-      <a href="/admin/announcements.html">进入后台管理</a>
+      <a id="admin-entry-link" href="/admin/announcements.html" hidden>进入后台管理</a>
     </div>
     <div id="announcement-list"></div>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script>
+    const AUTH = window.Demo5Auth;
+    const adminEntryLinkEl = document.getElementById('admin-entry-link');
     const listEl = document.getElementById('announcement-list');
+
+    AUTH.loadCurrentUser().then((user) => {
+      adminEntryLinkEl.hidden = !AUTH.isAdmin(user);
+    });
 
     function escapeHtml(text) {
       return String(text || '')
